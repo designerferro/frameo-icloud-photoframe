@@ -31,8 +31,10 @@ final class AppUpdater {
     }
     String installedLabel(){return installed.versionName+" ("+installed.versionCode+")";}
     String latestLabel(){return prefs.getString("latestRelease","ainda não consultada");}
-    void say(String message){ui.post(()->{if(!activity.destroyed)Toast.makeText(activity,message,Toast.LENGTH_LONG).show();});}
-    void check(boolean manual){
+    void say(String message){prefs.edit().putString("updateStatus",message).apply();ui.post(()->{if(!activity.destroyed)Toast.makeText(activity,message,Toast.LENGTH_LONG).show();});}
+    void check(boolean manual){check(manual,false);}
+    void checkRemote(boolean reinstall){check(true,reinstall);}
+    private void check(boolean manual,boolean remoteReinstall){
         if(!manual&&System.currentTimeMillis()-prefs.getLong("lastApkCheck",0)<21600000)return;
         if(!running.compareAndSet(false,true)){if(manual)say("Já está a verificar uma atualização.");return;}
         if(manual)say("A consultar a última release no GitHub…");
@@ -54,7 +56,8 @@ final class AppUpdater {
                 prefs.edit().putString("latestRelease",name+" ("+code+")").putLong("lastApkCheck",System.currentTimeMillis()).apply();
                 if(!VersionPolicy.eligible(installed.versionCode,code,false)){
                     if(manual){
-                        if(code==installed.versionCode){
+                        if(code==installed.versionCode&&remoteReinstall){prepareAndInstall(download,checksum,code,name,true);}
+                        else if(code==installed.versionCode){
                             ui.post(()->{if(!activity.destroyed)new AlertDialog.Builder(activity).setTitle("APK atualizado")
                                 .setMessage("Instalado: "+installedLabel()+"\nGitHub: "+name+" ("+code+")\nPodes forçar a reinstalação desta release sem apagar os dados.")
                                 .setPositiveButton("Reinstalar",(d,w)->downloadAndInstall(download,checksum,code,name)).setNegativeButton("Cancelar",null).show();});

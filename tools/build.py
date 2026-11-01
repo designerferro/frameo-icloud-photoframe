@@ -51,7 +51,8 @@ def main():
         for file in sorted(classes.rglob('*.class')):archive.write(file,file.relative_to(classes).as_posix())
     run(java,'-cp',tools/'lib/d8.jar','com.android.tools.r8.D8','--lib',android,'--min-api','23','--output',out,jar)
     unsigned=out/'unsigned.apk'
-    run(tools/('aapt'+exe),'package','-f','-M',ROOT/'AndroidManifest.xml','-I',android,'-F',unsigned)
+    assets=['-A',ROOT/'assets'] if (ROOT/'assets').is_dir() else []
+    run(tools/('aapt'+exe),'package','-f','-M',ROOT/'AndroidManifest.xml','-I',android,'-F',unsigned,*assets)
     with zipfile.ZipFile(unsigned,'a') as archive:archive.write(out/'classes.dex','classes.dex')
     aligned=out/'aligned.apk';run(tools/('zipalign'+exe),'-f','4',unsigned,aligned)
     key=(args.keystore or out/'photoframe-signing.p12').expanduser().resolve()

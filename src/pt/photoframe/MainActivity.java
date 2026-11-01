@@ -18,6 +18,9 @@ import java.util.concurrent.*;
 
 /** Offline-first viewer. Cache is private to this app; no storage permission. */
 public class MainActivity extends Activity {
+    private static java.lang.ref.WeakReference<MainActivity> instance=new java.lang.ref.WeakReference<>(null);
+    static MainActivity active(){MainActivity a=instance.get();return a==null||a.destroyed?null:a;}
+    final ArrayList<File> chronological=new ArrayList<>();
     final Handler ui = new Handler();
     final ExecutorService worker = Executors.newSingleThreadExecutor();
     final ExecutorService updaterWorker = Executors.newSingleThreadExecutor();
@@ -86,6 +89,8 @@ public class MainActivity extends Activity {
             File manifest = new File(getFilesDir(),"slides.json");
             if(manifest.exists()) loadManifest(new JSONArray(new String(read(new FileInputStream(manifest),2000000),"UTF-8")));
         } catch(Exception e) { status="Erro de configuração: "+e.getClass().getSimpleName(); }
+        instance=new java.lang.ref.WeakReference<>(this);
+        if(preferences.getBoolean("remoteEnabled",true))startService(new Intent(this,RemoteService.class));
         next();
         if(token==null)ui.post(()->configureAlbum());
     }
@@ -93,7 +98,7 @@ public class MainActivity extends Activity {
     @Override public void onWindowFocusChanged(boolean focused){ super.onWindowFocusChanged(focused); if(focused) immersive(); }
     @Override public void onResume(){super.onResume();resumed=true;if(index>=0&&index<slides.size()&&slides.get(index).getName().endsWith(".mp4")){index--;next();}else schedulePhoto();ui.post(poll);if(updater!=null)ui.post(updatePoll);}
     @Override public void onPause(){super.onPause();resumed=false;stopVideo();ui.removeCallbacks(advance);ui.removeCallbacks(poll);ui.removeCallbacks(updatePoll);}
-    @Override public void onDestroy(){destroyed=true;stopVideo();ui.removeCallbacksAndMessages(null);worker.shutdownNow();updaterWorker.shutdownNow();super.onDestroy();}
+    @Override public void onDestroy(){destroyed=true;if(instance.get()==this)instance.clear();stopVideo();ui.removeCallbacksAndMessages(null);worker.shutdownNow();updaterWorker.shutdownNow();super.onDestroy();}
     @Override public void onBackPressed(){menu();}
     void schedulePhoto(){ui.removeCallbacks(advance);if(resumed)ui.postDelayed(advance,15000);}
     void stopVideo(){ui.removeCallbacks(videoLimit);playing=null;if(video!=null){video.stopPlayback();video.setVisibility(View.GONE);}}
@@ -126,6 +131,10 @@ public class MainActivity extends Activity {
     void next(){
         ui.removeCallbacks(advance);stopVideo();
         if(slides.isEmpty()) return;
+        if(index==slides.size()-1&&preferences.getString("slideOrder","date").equals("random")){
+            File previous=slides.get(index);Collections.shuffle(slides);
+            if(slides.size()>1&&slides.get(0).equals(previous))Collections.swap(slides,0,1);
+        }
         index=(index+1)%slides.size();
         File slide=slides.get(index);
         if(slide.getName().endsWith(".mp4")){
@@ -152,6 +161,8 @@ public class MainActivity extends Activity {
         addButton(options,"Apagar álbum e fotografias/filmes locais",()->confirmClearAlbum());
         addButton(options,"Apresentação e orientação",()->displaySettings());
         addButton(options,"Filmes: duração e volume",()->videoSettings());
+        addButton(options,"Ordem de apresentação",()->orderSettings());
+        addButton(options,"Acesso remoto",()->remoteSettingsMenu());
         CheckBox auto=new CheckBox(this);auto.setText("Atualizar APK automaticamente (GitHub)");auto.setChecked(preferences.getBoolean("autoUpdate",true));
         auto.setOnCheckedChangeListener((v,checked)->preferences.edit().putBoolean("autoUpdate",checked).apply());options.addView(auto);
         addButton(options,"Definições Android",()->startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS)));
@@ -166,6 +177,69 @@ public class MainActivity extends Activity {
             else{int orientation=which==2?ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR:which==3?ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
                 preferences.edit().putInt("orientation",orientation).apply();setRequestedOrientation(orientation);}
         }).show();
+    }
+    void orderSettings(){
+        String[] choices={"Aleatório","Por data da fotografia"};
+        new AlertDialog.Builder(this).setTitle("Ordem de apresentação").setSingleChoiceItems(choices,preferences.getString("slideOrder","date").equals("random")?0:1,(dialog,which)->{
+            preferences.edit().putString("slideOrder",which==0?"random":"date").apply();reorder();next();dialog.dismiss();
+        }).setNegativeButton("Cancelar",null).show();
+    }
+    void reorder(){slides.clear();slides.addAll(chronological);if(preferences.getString("slideOrder","date").equals("random"))Collections.shuffle(slides);index=-1;}
+    void remoteSettingsMenu(){
+        LinearLayout fields=new LinearLayout(this);fields.setOrientation(LinearLayout.VERTICAL);fields.setPadding(24,8,24,8);
+        TextView address=new TextView(this);address.setText(RemoteService.addresses()+"\n\n"+RemoteService.serverState+"\nNo primeiro acesso: admin / admin. É obrigatório alterar o utilizador e a palavra-passe antes de configurar. Usar apenas na rede interna.");fields.addView(address);
+        CheckBox enabled=new CheckBox(this);enabled.setText("Permitir acesso remoto na rede interna");enabled.setChecked(preferences.getBoolean("remoteEnabled",true));
+        enabled.setOnCheckedChangeListener((button,value)->{preferences.edit().putBoolean("remoteEnabled",value).apply();if(value)startService(new Intent(this,RemoteService.class));else{stopService(new Intent(this,RemoteService.class));RemoteService.serverState="Desativado";}});fields.addView(enabled);
+        addButton(fields,"Repor credenciais remotas",()->new AlertDialog.Builder(this).setTitle("Repor acesso remoto?").setMessage("Volta a admin / admin e termina as sessões abertas. O primeiro acesso obriga a escolher novas credenciais. Não altera o álbum.").setPositiveButton("Repor",(d,w)->{RemoteService.reset(this);Toast.makeText(this,"Credenciais repostas",Toast.LENGTH_LONG).show();}).setNegativeButton("Cancelar",null).show());
+        new AlertDialog.Builder(this).setTitle("Acesso remoto").setView(fields).setNegativeButton("Fechar",null).show();
+    }
+    JSONObject remoteState()throws Exception{
+        return new JSONObject().put("albumConfigured",token!=null).put("crop",preferences.getBoolean("crop",false))
+            .put("orientation",preferences.getInt("orientation",ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR))
+            .put("order",preferences.getString("slideOrder","date")).put("videoSeconds",videoSeconds())
+            .put("maxVideoSeconds",VideoSupport.maxSeconds(cache)).put("volume",preferences.getInt("videoVolume",0))
+            .put("remoteEnabled",preferences.getBoolean("remoteEnabled",true)).put("updateStatus",preferences.getString("updateStatus",""))
+            .put("autoUpdate",preferences.getBoolean("autoUpdate",true)).put("count",slides.size()).put("busy",busy)
+            .put("status",status).put("installed",updater.installedLabel()).put("latest",updater.latestLabel());
+    }
+    JSONObject remoteSettings(JSONObject changes)throws Exception{
+        int orientation=changes.getInt("orientation"),duration=changes.getInt("videoSeconds"),volume=changes.getInt("volume");
+        String order=changes.getString("order");boolean crop=changes.getBoolean("crop"),automatic=changes.getBoolean("autoUpdate"),remote=changes.optBoolean("remoteEnabled",true);
+        if(orientation!=ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR&&orientation!=ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE&&orientation!=ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)throw new IllegalArgumentException("Orientação inválida");
+        if(!order.equals("date")&&!order.equals("random"))throw new IllegalArgumentException("Ordem inválida");
+        if(duration<1||duration>VideoSupport.maxSeconds(cache)||volume<0||volume>10)throw new IllegalArgumentException("Duração ou volume fora dos limites");
+        boolean orderChanged=!order.equals(preferences.getString("slideOrder","date"));
+        boolean durationChanged=duration!=preferences.getInt("videoSeconds",30);
+        preferences.edit().putInt("orientation",orientation).putInt("videoSeconds",duration).putInt("videoVolume",volume).putString("slideOrder",order).putBoolean("crop",crop).putBoolean("autoUpdate",automatic).putBoolean("remoteEnabled",remote).commit();
+        photo.setScaleType(crop?ImageView.ScaleType.CENTER_CROP:ImageView.ScaleType.FIT_CENTER);applyVolume();
+        if(playing!=null){ui.removeCallbacks(videoLimit);ui.postDelayed(videoLimit,Math.max(0,duration*1000L-video.getCurrentPosition()));}
+        if(orderChanged){reorder();next();}
+        if(durationChanged)sync();
+        JSONObject state=remoteState();setRequestedOrientation(orientation);if(!remote)ui.postDelayed(()->{stopService(new Intent(this,RemoteService.class));RemoteService.serverState="Desativado";},1500);return state;
+    }
+    JSONObject remoteAction(JSONObject command)throws Exception{
+        String action=command.getString("action");
+        switch(action){
+            case "album":{
+                if(busy)throw new IllegalArgumentException("Aguarda o fim da sincronização atual.");
+                String link=command.optString("url").trim();if(link.isEmpty())return remoteState();
+                String nextToken=parseAlbum(link),nextBase=albumBase(nextToken);
+                if(token!=null&&!token.equals(nextToken)&&command.optBoolean("clear",true))clearAlbumData();
+                token=nextToken;base=nextBase;preferences.edit().putString("albumToken",token).commit();sync();break;
+            }
+            case "clear":if(busy)throw new IllegalArgumentException("Aguarda o fim da sincronização atual.");if(!command.optBoolean("confirm"))throw new IllegalArgumentException("Confirma a remoção do álbum e ficheiros locais");clearAlbumData();break;
+            case "sync":if(busy)throw new IllegalArgumentException("Já está a sincronizar");if(token==null)throw new IllegalArgumentException("Configura primeiro um álbum");sync();break;
+            case "update":updater.checkRemote(command.optBoolean("reinstall"));break;
+            case "android":startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));break;
+            case "next":next();break;
+            default:throw new IllegalArgumentException("Operação desconhecida");
+        }
+        return remoteState();
+    }
+    static String parseAlbum(String link)throws Exception{
+        URI uri=new URI(link);String host=uri.getHost();
+        if(!"https".equals(uri.getScheme())||!("www.icloud.com".equals(host)||"icloud.com".equals(host))||!"/sharedalbum/".equals(uri.getPath())||uri.getFragment()==null||uri.getUserInfo()!=null||uri.getPort()!=-1)throw new IllegalArgumentException("Usa a ligação Site público de um Álbum partilhado");
+        String nextToken=uri.getFragment().split(";")[0];albumBase(nextToken);return nextToken;
     }
     static String albumBase(String token)throws IOException{
         if(!token.matches("[ABCD][0-9A-Za-z_-]{5,}"))throw new IOException("Ligação de álbum inválida");
@@ -188,9 +262,7 @@ public class MainActivity extends Activity {
             if(input.getText().toString().trim().isEmpty()&&token!=null){dialog.dismiss();return;}
             if(busy){Toast.makeText(this,"Aguarda o fim da sincronização atual.",Toast.LENGTH_LONG).show();return;}
             try{
-                URI uri=new URI(input.getText().toString().trim());String host=uri.getHost();
-                if(!"https".equals(uri.getScheme())||!("www.icloud.com".equals(host)||"icloud.com".equals(host))||!"/sharedalbum/".equals(uri.getPath())||uri.getFragment()==null)throw new IOException();
-                String nextToken=uri.getFragment().split(";")[0];String nextBase=albumBase(nextToken);
+                String nextToken=parseAlbum(input.getText().toString().trim());String nextBase=albumBase(nextToken);
                 if(token!=null&&!token.equals(nextToken)&&clear.isChecked())clearAlbumData();
                 token=nextToken;base=nextBase;preferences.edit().putString("albumToken",token).apply();dialog.dismiss();sync();
             }catch(Exception e){input.setError("Usa a ligação Site público de um Álbum partilhado.");}
@@ -206,7 +278,7 @@ public class MainActivity extends Activity {
     }
     void clearAlbumData()throws IOException{
         // UI thread only, with no sync in flight. Discard in-memory images immediately.
-        stopVideo();photo.setImageDrawable(null);backdrop.setImageDrawable(null);slides.clear();index=-1;
+        stopVideo();photo.setImageDrawable(null);backdrop.setImageDrawable(null);slides.clear();chronological.clear();index=-1;
         token=null;base=null;boolean cleared=preferences.edit().remove("albumToken").commit();
         placeholder.setText("Photoframe\nConfigura um álbum no menu (toque prolongado).");placeholder.setVisibility(View.VISIBLE);
         status="Álbum removido. Configura um álbum para sincronizar.";
@@ -220,12 +292,22 @@ public class MainActivity extends Activity {
     }
     void loadManifest(JSONArray files) throws Exception {
         ArrayList<File> ready=new ArrayList<>();
+        if(files.length()>0&&files.get(0) instanceof JSONObject){
+            ArrayList<JSONObject> sorted=new ArrayList<>();for(int i=0;i<files.length();i++)sorted.add(files.getJSONObject(i));
+            Collections.sort(sorted,(a,b)->a.optString("date").compareTo(b.optString("date")));files=new JSONArray();for(JSONObject item:sorted)files.put(item);
+        }
         for(int i=0;i<files.length();i++){
-            String name=files.getString(i);
+            String name=files.get(i) instanceof JSONObject?files.getJSONObject(i).getString("name"):files.getString(i);
             if(!name.matches("[a-zA-Z0-9-]+\\.(jpg|mp4)")) throw new IOException("Invalid cache name");
             File f=new File(cache,name); if(f.exists()) ready.add(f);
         }
-        if(!ready.isEmpty()){slides.clear();slides.addAll(ready);index=-1;}
+        if(!ready.isEmpty()){
+            File current=index>=0&&index<slides.size()?slides.get(index):null;
+            boolean same=slides.size()==ready.size()&&new HashSet<File>(slides).equals(new HashSet<File>(ready));
+            chronological.clear();chronological.addAll(ready);
+            boolean random=preferences.getString("slideOrder","date").equals("random");
+            if(!(same&&random)){slides.clear();slides.addAll(ready);if(random){Collections.shuffle(slides);index=-1;}else index=current==null?-1:slides.indexOf(current);}
+        }
     }
     synchronized void sync(){
         if(busy||base==null||destroyed)return;
@@ -261,7 +343,7 @@ public class MainActivity extends Activity {
                         if(best==null)continue;
                         String sum=best.getString("checksum");
                         if(!sum.matches("[a-fA-F0-9]+"))throw new IOException("Invalid checksum");
-                        String name=sum+(movie?"-v2-"+syncSeconds+".mp4":".jpg");manifest.put(name);
+                        String name=sum+(movie?"-v2-"+syncSeconds+".mp4":".jpg");manifest.put(new JSONObject().put("name",name).put("date",p.optString("dateCreated")));
                         best.put("localName",name).put("movie",movie);
                         if(!new File(cache,name).exists()){
                             ids.put(p.getString("photoGuid"));needed.add(best);
@@ -282,7 +364,7 @@ public class MainActivity extends Activity {
                                 if(!temp.renameTo(new File(cache,d.getString("localName"))))throw new IOException("Cannot save video");
                             }catch(Exception e){
                                 skipped++;
-                                for(int n=manifest.length()-1;n>=0;n--)if(d.getString("localName").equals(manifest.getString(n)))manifest.remove(n);
+                                for(int n=manifest.length()-1;n>=0;n--)if(d.getString("localName").equals(manifest.getJSONObject(n).getString("name")))manifest.remove(n);
                                 android.util.Log.w("Photoframe","VIDEO_SKIPPED "+e.getClass().getSimpleName());
                             }finally{source.delete();temp.delete();}
                             continue;
@@ -330,7 +412,7 @@ public class MainActivity extends Activity {
                     catch(Exception e){status="Erro ao abrir o álbum local";}
                 });
                 // Delete only this app's obsolete cached images after a successful update.
-                HashSet<String> keep=new HashSet<>();for(int i=0;i<manifest.length();i++)keep.add(manifest.getString(i));
+                HashSet<String> keep=new HashSet<>();for(int i=0;i<manifest.length();i++)keep.add(manifest.getJSONObject(i).getString("name"));
                 for(File f:cache.listFiles())if(!keep.contains(f.getName()))f.delete();
                 android.util.Log.i("Photoframe","SYNC_OK photos="+manifest.length());
             } catch(Exception e){

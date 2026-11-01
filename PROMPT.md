@@ -28,3 +28,14 @@ Preparar também um artigo em português europeu para o Pouparmelhor, com ligaç
 ## Versão 1.2.0
 
 Todo o código é escrito pelo Codex; destacar isto no README e na página GitHub. Reproduzir filmes do álbum com cache offline, preparar MP4/H.264 na moldura e reduzir a resolução ao ecrã quando necessário. Conservar áudio AAC. Permitir configurar duração (30 segundos por omissão, máximo calculado pelo armazenamento da moldura) e volume entre 0 e 10 (silêncio a máximo). Ignorar filmes incompatíveis com indicação no estado e manter fotografias utilizáveis.
+
+
+## Versão 1.3.0 — acesso remoto e ordem
+
+Implementar uma página HTML/CSS/JavaScript leve incluída no APK, sem recursos externos, servida por HTTP na porta 8080 para clientes da rede interna. Não incluir integração Home Assistant. Manter o servidor num serviço Android não exportado, em primeiro plano com notificação, independente da atividade. Mostrar o endereço e permitir ativação/desativação e recuperação de credenciais no menu local.
+
+Credenciais iniciais: admin / admin. O primeiro login só permite escolher um novo utilizador diferente de admin e uma nova palavra-passe antes de consultar/alterar configurações. Guardar palavra-passe como PBKDF2 com salt aleatório; usar sessões aleatórias, expiração, cookie HttpOnly/SameSite, invalidação após mudança, limites de tentativas, validação Host/Origin, proteção CSRF e pedidos de tamanho limitado. Não registar credenciais nem o URL/token do álbum. Avisar que HTTP não cifra a ligação e destina-se à LAN.
+
+A página deve expor as configurações e ações do menu: álbum apenas para substituição (campo vazio e mascarado), remoção local com confirmação, sincronização, apresentação/recorte, orientação, duração/volume dos filmes, atualização automática, procura/forçar reinstalação, abertura das definições Android na moldura e ordem. A instalação sem root continua sujeita à confirmação local do Android. Permitir mudar as credenciais e terminar a sessão. As credenciais podem ser repostas localmente sem apagar o álbum.
+
+Acrescentar Ordem de apresentação aos dois interfaces, com Aleatório e Por data da fotografia, persistente e aplicável a fotografias/filmes offline. Por data é a ordem ascendente pela data fornecida pelo iCloud e a opção por omissão. Aleatório baralha voltas completas e evita repetição imediata entre voltas. Guardar a data no manifesto da cache, aceitar o formato antigo e conservar a sequência quando a sincronização não alterar os itens.

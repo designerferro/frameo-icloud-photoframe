@@ -17,8 +17,9 @@ for name in ('sdk','jdk','keystore','apk'):
     p.add_argument('--'+name,required=True,type=Path)
 p.add_argument('--alias',default='photoframe')
 p.add_argument('--privacy-only',action='store_true',help='Test the album privacy dialog instead of video; requires a configured test album')
+p.add_argument('--remote-only',action='store_true',help='Test LAN authentication, settings and ordering; restores original credentials')
 a=p.parse_args()
-runner='PrivacyRunner' if a.privacy_only else 'Runner'
+runner='RemoteRunner' if a.remote_only else 'PrivacyRunner' if a.privacy_only else 'Runner'
 def run(*command):
     subprocess.run([str(x) for x in command],check=True)
 with tempfile.TemporaryDirectory(prefix='photoframe-video-') as temporary:
@@ -29,14 +30,14 @@ with tempfile.TemporaryDirectory(prefix='photoframe-video-') as temporary:
     (source/'VERSION.json').write_text(json.dumps(dict(versionName='test',versionCode=1,author='Codex',repository='designerferro/frameo-icloud-photoframe')))
     (source/'AndroidManifest.xml').write_text(('''<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="pt.photoframe.videotest" android:versionCode="1" android:versionName="test"><uses-sdk android:minSdkVersion="23" android:targetSdkVersion="23"/><application android:label="Video test"/><instrumentation android:name="pt.photoframe.TEST_RUNNER" android:targetPackage="pt.photoframe"/></manifest>''').replace('TEST_RUNNER',runner))
     run(sys.executable,source/'tools/build.py','--sdk',a.sdk.resolve(),'--jdk',a.jdk.resolve(),'--keystore',a.keystore.resolve(),'--alias',a.alias,'--out',work/'build')
-    if not a.privacy_only:
+    if not (a.privacy_only or a.remote_only):
         for name,size in (('small','640x360'),('large','1920x1080')):
             run('ffmpeg','-hide_banner','-loglevel','error','-f','lavfi','-i','testsrc2=size='+size+':rate=24','-f','lavfi','-i','sine=frequency=440:sample_rate=44100','-t','4','-c:v','libx264','-preset','ultrafast','-pix_fmt','yuv420p','-c:a','aac','-y',work/(name+'.mp4'))
         run('ffmpeg','-hide_banner','-loglevel','error','-display_rotation','90','-i',work/'large.mp4','-c','copy','-y',work/'rotated.mp4')
     run('adb','install','-r',a.apk.resolve())
     run('adb','install','-r',work/'build/Photoframe-vtest.apk')
     try:
-        if not a.privacy_only:
+        if not (a.privacy_only or a.remote_only):
             for name in ('small','large','rotated'):
                 run('adb','push',work/(name+'.mp4'),'/data/local/tmp/'+name+'.mp4')
         result=subprocess.check_output(['adb','shell','am','instrument','-w','pt.photoframe.videotest/pt.photoframe.'+runner],text=True,timeout=90)
