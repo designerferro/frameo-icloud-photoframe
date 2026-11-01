@@ -68,3 +68,7 @@ Diagnóstico num equipamento Android 6: o cálculo PBKDF2 demorou cerca de 18 se
 ## Instalação root na versão 1.3.3
 
 Falha anterior reproduzida em Android 6: `pm install -r` devolve `INSTALL_FAILED_INVALID_URI` para a cópia numa pasta root privada. O envio por sessão Android instalou a 1.3.2 e preservou as preferências, incluindo credenciais. `RootInstallerTest` verifica envio integral, nomes com aspas e falhas em create/write/commit mesmo quando pm devolve código zero; sessões falhadas são abandonadas.
+
+
+## 1.4.0 — horário
+Testes puros verificam os 1440 minutos de intervalos diurnos/noturnos, extremos inclusivo/exclusivo, validação HH:mm e próximo alarme. Compilação Android API 23. O desligar físico e o despertar dependem do root e do equipamento; confirmar na moldura antes de confiar no horário.

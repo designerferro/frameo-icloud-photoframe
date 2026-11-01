@@ -14,6 +14,8 @@ java=Path(args.jdk)/'bin' if args.jdk else Path('')
 suffix='.exe' if os.name=='nt' else ''
 def tool(name):return str(java/(name+suffix)) if args.jdk else name
 with tempfile.TemporaryDirectory(prefix='photoframe-policy-') as directory:
+    subprocess.run([tool('javac'),'-encoding','UTF-8','-d',directory,str(root/'src/pt/photoframe/ScreenSchedule.java'),str(root/'tests/ScreenScheduleTest.java')],check=True)
+    subprocess.run([tool('java'),'-cp',directory,'ScreenScheduleTest'],check=True)
     subprocess.run([tool('javac'),'-encoding','UTF-8','-d',directory,str(root/'src/pt/photoframe/VersionPolicy.java'),str(root/'tests/VersionPolicyTest.java')],check=True)
     subprocess.run([tool('java'),'-cp',directory,'VersionPolicyTest'],check=True)
     subprocess.run([tool('javac'),'-encoding','UTF-8','-d',directory,str(root/'src/pt/photoframe/RemoteSecurity.java'),str(root/'src/pt/photoframe/RemoteHttpServer.java'),str(root/'tests/RemoteCoreTest.java')],check=True)

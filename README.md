@@ -8,7 +8,7 @@ Aplicação Android nativa, leve, para apresentar fotografias e filmes de um **�
 
 O APK das Releases é genérico: **não contém fotografias, ligação a um álbum, credenciais Apple, token GitHub nem chave privada**. A ligação é introduzida na moldura e guardada no espaço privado da aplicação.
 
-A versão **1.3.3** corrige a instalação automática com root no Android 6, preservando a espera alargada do login HTTP, os dados e as credenciais.
+A versão **1.4.0** acrescenta um horário diário para desligar e voltar a ligar o ecrã, configurável na moldura e pelo acesso remoto.
 
 ## Fotografias e apresentação
 
@@ -39,6 +39,14 @@ O servidor usa um serviço Android em primeiro plano, com notificação, e conti
 **HTTP não cifra o tráfego.** Usar apenas numa rede interna de confiança; não encaminhar a porta para a Internet. O endereço IP pode mudar com o Wi-Fi/DHCP. Redes de convidados ou com isolamento entre clientes podem impedir o acesso. Esta versão não inclui integração Home Assistant.
 
 Se perderes as credenciais, usar **Acesso remoto → Repor credenciais remotas** na própria moldura: volta a `admin / admin`, termina as sessões e obriga novamente à alteração no primeiro acesso, preservando o álbum. Se desativares o acesso remoto, a reativação é feita no menu local.
+
+## Horário do ecrã
+
+No menu **Horário do ecrã**, ou na secção equivalente da página remota, ativar a opção diária e definir **Desligar às** e **Ligar às** (HH:mm). Por exemplo, 22:00–08:00 desliga durante a noite. Usa a hora local da moldura; as horas devem ser diferentes. Fica desativado por omissão e conserva a configuração após reiniciar ou atualizar.
+
+Requer **root autorizado para Photoframe** e suporte do equipamento aos comandos Android de dormir/despertar. Desliga realmente o painel e pausa os filmes/som, mantendo a moldura alimentada. Um alarme acorda o equipamento no fim do intervalo. Não mantém o processador acordado toda a noite. O acesso remoto continua disponível quando ativado e com rede acessível. O estado do horário indica se o comando foi executado ou se houve uma falha root; não confirma eletricamente o painel. Equipamentos sem root não têm garantia de desligar o painel. O alvo principal é Android 6; as restrições de alarmes de versões recentes podem afetar o despertar.
+
+Guardar dentro do intervalo aplica o desligar de imediato. Para cancelar durante o descanso, desativar a opção pela página remota ou acordar manualmente a moldura e abrir o menu. Não corta a alimentação nem altera o álbum.
 
 ## Ordem de apresentação
 
@@ -77,7 +85,7 @@ Não é necessário compilar para usar a aplicação. Descarregar o APK em [Rele
 
 ```text
 adb devices -l
-adb install Photoframe-v1.3.3.apk
+adb install Photoframe-v1.4.0.apk
 adb shell am start -n pt.photoframe/.MainActivity
 ```
 
@@ -140,11 +148,11 @@ As versões são comparadas pelo inteiro **versionCode**. `versionName` e tag s�
 
 ```json
 {
-  "versionName": "1.3.3",
-  "versionCode": 9,
+  "versionName": "1.4.0",
+  "versionCode": 10,
   "repository": "designerferro/frameo-icloud-photoframe",
   "author": "Codex",
-  "apk": "Photoframe-v1.3.3.apk",
+  "apk": "Photoframe-v1.4.0.apk",
   "sha256": "DIGEST_SHA256_GERADO_A_PARTIR_DO_APK",
   "minSdk": 23
 }
@@ -227,4 +235,4 @@ O início de sessão e a alteração do utilizador/palavra-passe podem demorar a
 
 ### Instalação automática com root no Android 6
 
-A versão 1.3.3 envia o APK privado diretamente para uma sessão do instalador Android. Corrige `INSTALL_FAILED_INVALID_URI` das versões anteriores. Se a versão antiga não conseguir atualizar-se, instala o APK 1.3.3 por ADB com `adb install -r Photoframe-v1.3.3.apk`, sem desinstalar ou apagar os dados. Uma mensagem de operação em curso significa que deves aguardar a tentativa atual.
+A versão 1.3.3 envia o APK privado diretamente para uma sessão do instalador Android. Corrige `INSTALL_FAILED_INVALID_URI` das versões anteriores. Se a versão antiga não conseguir atualizar-se, instala o APK 1.3.3 por ADB com `adb install -r Photoframe-v1.4.0.apk`, sem desinstalar ou apagar os dados. Uma mensagem de operação em curso significa que deves aguardar a tentativa atual.

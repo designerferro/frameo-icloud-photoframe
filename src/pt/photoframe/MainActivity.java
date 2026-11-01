@@ -91,16 +91,17 @@ public class MainActivity extends Activity {
         } catch(Exception e) { status="Erro de configuração: "+e.getClass().getSimpleName(); }
         instance=new java.lang.ref.WeakReference<>(this);
         if(preferences.getBoolean("remoteEnabled",true))startService(new Intent(this,RemoteService.class));
+        ScreenReceiver.refresh(this);
         next();
         if(token==null)ui.post(()->configureAlbum());
     }
     void immersive(){ getWindow().getDecorView().setSystemUiVisibility(5894); }
     @Override public void onWindowFocusChanged(boolean focused){ super.onWindowFocusChanged(focused); if(focused) immersive(); }
-    @Override public void onResume(){super.onResume();resumed=true;if(index>=0&&index<slides.size()&&slides.get(index).getName().endsWith(".mp4")){index--;next();}else schedulePhoto();ui.post(poll);if(updater!=null)ui.post(updatePoll);}
+    @Override public void onResume(){super.onResume();resumed=true;if(ScreenReceiver.sleeping(this)){resumed=false;return;}if(index>=0&&index<slides.size()&&slides.get(index).getName().endsWith(".mp4")){index--;next();}else schedulePhoto();ui.post(poll);if(updater!=null)ui.post(updatePoll);}
     @Override public void onPause(){super.onPause();resumed=false;stopVideo();ui.removeCallbacks(advance);ui.removeCallbacks(poll);ui.removeCallbacks(updatePoll);}
     @Override public void onDestroy(){destroyed=true;if(instance.get()==this)instance.clear();stopVideo();ui.removeCallbacksAndMessages(null);worker.shutdownNow();updaterWorker.shutdownNow();super.onDestroy();}
     @Override public void onBackPressed(){menu();}
-    void schedulePhoto(){ui.removeCallbacks(advance);if(resumed)ui.postDelayed(advance,15000);}
+    void schedulePhoto(){ui.removeCallbacks(advance);if(resumed&&!ScreenReceiver.sleeping(this))ui.postDelayed(advance,15000);}
     void stopVideo(){ui.removeCallbacks(videoLimit);playing=null;if(video!=null){video.stopPlayback();video.setVisibility(View.GONE);}}
     int videoSeconds(){return Math.max(1,Math.min(preferences.getInt("videoSeconds",30),VideoSupport.maxSeconds(cache)));}
     void applyVolume(){
@@ -130,7 +131,7 @@ public class MainActivity extends Activity {
     }
     void next(){
         ui.removeCallbacks(advance);stopVideo();
-        if(slides.isEmpty()) return;
+        if(slides.isEmpty()||ScreenReceiver.sleeping(this)) return;
         if(index==slides.size()-1&&preferences.getString("slideOrder","date").equals("random")){
             File previous=slides.get(index);Collections.shuffle(slides);
             if(slides.size()>1&&slides.get(0).equals(previous))Collections.swap(slides,0,1);
@@ -162,6 +163,7 @@ public class MainActivity extends Activity {
         addButton(options,"Apresentação e orientação",()->displaySettings());
         addButton(options,"Filmes: duração e volume",()->videoSettings());
         addButton(options,"Ordem de apresentação",()->orderSettings());
+        addButton(options,"Horário do ecrã",()->screenSettings());
         addButton(options,"Acesso remoto",()->remoteSettingsMenu());
         CheckBox auto=new CheckBox(this);auto.setText("Atualizar APK automaticamente (GitHub)");auto.setChecked(preferences.getBoolean("autoUpdate",true));
         auto.setOnCheckedChangeListener((v,checked)->preferences.edit().putBoolean("autoUpdate",checked).apply());options.addView(auto);
@@ -177,6 +179,22 @@ public class MainActivity extends Activity {
             else{int orientation=which==2?ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR:which==3?ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
                 preferences.edit().putInt("orientation",orientation).apply();setRequestedOrientation(orientation);}
         }).show();
+    }
+    void screenSettings(){
+        LinearLayout fields=new LinearLayout(this);fields.setOrientation(LinearLayout.VERTICAL);fields.setPadding(24,8,24,8);
+        CheckBox enabled=new CheckBox(this);enabled.setText("Desligar ecrã diariamente (requer root)");enabled.setChecked(preferences.getBoolean("screenSchedule",false));fields.addView(enabled);
+        TextView info=new TextView(this);info.setText("Hora local da moldura, formato HH:mm. Pode atravessar a meia-noite.\n"+preferences.getString("screenStatus",""));fields.addView(info);
+        TextView offLabel=new TextView(this);offLabel.setText("Desligar às");fields.addView(offLabel);
+        EditText off=new EditText(this);off.setSingleLine();off.setText(preferences.getString("screenOff","22:00"));fields.addView(off);
+        TextView onLabel=new TextView(this);onLabel.setText("Ligar às");fields.addView(onLabel);
+        EditText on=new EditText(this);on.setSingleLine();on.setText(preferences.getString("screenOn","08:00"));fields.addView(on);
+        AlertDialog d=new AlertDialog.Builder(this).setTitle("Horário do ecrã").setView(fields).setPositiveButton("Guardar",null).setNegativeButton("Cancelar",null).create();
+        d.setOnShowListener(v->d.getButton(-1).setOnClickListener(w->{try{saveScreen(enabled.isChecked(),off.getText().toString(),on.getText().toString());d.dismiss();}catch(IllegalArgumentException e){off.setError(e.getMessage());}}));d.show();
+    }
+    void saveScreen(boolean enabled,String off,String on){
+        if(ScreenSchedule.minute(off)==ScreenSchedule.minute(on))throw new IllegalArgumentException("Escolhe horas diferentes para desligar e ligar");
+        preferences.edit().putBoolean("screenSchedule",enabled).putString("screenOff",off).putString("screenOn",on).commit();ScreenReceiver.refresh(this);
+        if(!ScreenReceiver.sleeping(this)&&hasWindowFocus()){resumed=true;next();}
     }
     void orderSettings(){
         String[] choices={"Aleatório","Por data da fotografia"};
@@ -194,7 +212,7 @@ public class MainActivity extends Activity {
         new AlertDialog.Builder(this).setTitle("Acesso remoto").setView(fields).setNegativeButton("Fechar",null).show();
     }
     JSONObject remoteState()throws Exception{
-        return new JSONObject().put("albumConfigured",token!=null).put("crop",preferences.getBoolean("crop",false))
+        return new JSONObject().put("screenSchedule",preferences.getBoolean("screenSchedule",false)).put("screenOff",preferences.getString("screenOff","22:00")).put("screenOn",preferences.getString("screenOn","08:00")).put("screenStatus",preferences.getString("screenStatus","")).put("albumConfigured",token!=null).put("crop",preferences.getBoolean("crop",false))
             .put("orientation",preferences.getInt("orientation",ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR))
             .put("order",preferences.getString("slideOrder","date")).put("videoSeconds",videoSeconds())
             .put("maxVideoSeconds",VideoSupport.maxSeconds(cache)).put("volume",preferences.getInt("videoVolume",0))
@@ -208,6 +226,9 @@ public class MainActivity extends Activity {
         if(orientation!=ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR&&orientation!=ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE&&orientation!=ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)throw new IllegalArgumentException("Orientação inválida");
         if(!order.equals("date")&&!order.equals("random"))throw new IllegalArgumentException("Ordem inválida");
         if(duration<1||duration>VideoSupport.maxSeconds(cache)||volume<0||volume>10)throw new IllegalArgumentException("Duração ou volume fora dos limites");
+        boolean screenEnabled=changes.optBoolean("screenSchedule",preferences.getBoolean("screenSchedule",false));
+        String screenOff=changes.optString("screenOff",preferences.getString("screenOff","22:00")),screenOn=changes.optString("screenOn",preferences.getString("screenOn","08:00"));
+        if(ScreenSchedule.minute(screenOff)==ScreenSchedule.minute(screenOn))throw new IllegalArgumentException("Escolhe horas diferentes para desligar e ligar");
         boolean orderChanged=!order.equals(preferences.getString("slideOrder","date"));
         boolean durationChanged=duration!=preferences.getInt("videoSeconds",30);
         preferences.edit().putInt("orientation",orientation).putInt("videoSeconds",duration).putInt("videoVolume",volume).putString("slideOrder",order).putBoolean("crop",crop).putBoolean("autoUpdate",automatic).putBoolean("remoteEnabled",remote).commit();
@@ -215,6 +236,7 @@ public class MainActivity extends Activity {
         if(playing!=null){ui.removeCallbacks(videoLimit);ui.postDelayed(videoLimit,Math.max(0,duration*1000L-video.getCurrentPosition()));}
         if(orderChanged){reorder();next();}
         if(durationChanged)sync();
+        saveScreen(screenEnabled,screenOff,screenOn);
         JSONObject state=remoteState();setRequestedOrientation(orientation);if(!remote)ui.postDelayed(()->{stopService(new Intent(this,RemoteService.class));RemoteService.serverState="Desativado";},1500);return state;
     }
     JSONObject remoteAction(JSONObject command)throws Exception{

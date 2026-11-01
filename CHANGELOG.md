@@ -1,3 +1,7 @@
+# 1.4.0 (versionCode 10)
+
+Horário diário configurável para desligar e ligar o ecrã com root, no menu local e no acesso remoto. Inclui intervalos noturnos, alarme de despertar e reposição após reinício/mudança da hora. Desativado por omissão.
+
 # Histórico
 
 ## 1.3.3 — versionCode 9
