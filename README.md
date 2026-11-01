@@ -8,7 +8,7 @@ Aplicação Android nativa, leve, para apresentar fotografias de um **Álbum par
 
 O APK das Releases é genérico: **não contém fotografias, ligação a um álbum, credenciais Apple, token GitHub nem chave privada**. A ligação é introduzida na moldura e guardada no espaço privado da aplicação.
 
-As melhorias de segurança e limpeza de dados na branch `main` destinam-se à próxima versão. O APK da release `v1.1.0` mantém o comportamento original até ser publicada uma nova release validada.
+A versão 1.1.1 acrescenta melhorias de segurança na instalação com root e permite apagar o álbum e a cache local.
 
 ## Fotografias e apresentação
 
@@ -37,7 +37,7 @@ Não é necessário compilar para usar a aplicação. Descarregar o APK em [Rele
 
 ```text
 adb devices -l
-adb install Photoframe-v1.1.0.apk
+adb install Photoframe-v1.1.1.apk
 adb shell am start -n pt.photoframe/.MainActivity
 ```
 
@@ -100,11 +100,11 @@ As versões são comparadas pelo inteiro **versionCode**. `versionName` e tag s�
 
 ```json
 {
-  "versionName": "1.1.0",
-  "versionCode": 2,
+  "versionName": "1.1.1",
+  "versionCode": 3,
   "repository": "designerferro/frameo-icloud-photoframe",
   "author": "Codex",
-  "apk": "Photoframe-v1.1.0.apk",
+  "apk": "Photoframe-v1.1.1.apk",
   "sha256": "DIGEST_SHA256_GERADO_A_PARTIR_DO_APK",
   "minSdk": 23
 }

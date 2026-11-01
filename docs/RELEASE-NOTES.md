@@ -1,13 +1,13 @@
-Photoframe para Android 6 ou superior. Autor técnico: **Codex**. Publicação e manutenção: **designerferro**.
+Photoframe 1.1.1 para Android 6 ou superior (versionCode 3).
 
-Configura o álbum público iCloud na própria aplicação. Não contém fotografias, ligações pessoais ou credenciais Apple.
+- Instalação de futuras atualizações com root numa pasta exclusiva e privada, com limpeza automática. Requer mktemp no Android; falha de forma segura se não estiver disponível.
+- Nova ação para apagar o álbum e todas as fotografias locais, sem alterar o álbum iCloud.
+- Ao mudar de álbum, a limpeza das fotografias anteriores está selecionada por defeito.
+- Erros de sincronização deixam de registar URLs nos logs.
+- Melhorias de deteção de secrets no código e histórico e verificações automáticas no GitHub.
 
-- Apresentação sem barras pretas: foto inteira sobre fundo suave ou preenchimento com recorte.
-- Orientação automática, horizontal ou vertical.
-- Menu por toque prolongado com versão instalada, última release e atualização do APK.
-- Consulta automática do GitHub a cada 6 horas enquanto a apresentação está aberta; instalação com root ou confirmação do instalador Android sem root.
-- SHA-256 e assinatura do APK verificados antes da instalação. Atualizações mantêm configuração e cache.
+Mantém a assinatura das versões anteriores. A atualização preserva o álbum e a cache existentes; só os apaga por ação explícita no menu ou ao mudar de álbum com a opção de limpeza selecionada.
 
-Descarrega `Photoframe-v1.1.0.apk`. `update.json` é usado pela aplicação; `SHA256SUMS` permite verificar o ficheiro manualmente.
+O APK é genérico: não inclui fotografias, ligação de álbum, credenciais Apple ou chaves privadas. Autor técnico: Codex. Publicação: designerferro.
 
-Fonte, prompt e instruções Windows/GNU/Linux/macOS no repositório. Não é uma aplicação oficial Apple ou Frameo. A sincronização depende dos endpoints do site público iCloud, sujeitos a alterações.
+APK: Photoframe-v1.1.1.apk. update.json e SHA256SUMS acompanham a release.
