@@ -44,3 +44,7 @@ Acrescentar Ordem de apresentação aos dois interfaces, com Aleatório e Por da
 ## Versão 1.3.1 — preparação MP4 compatível
 
 Intercalar os dados de áudio e vídeo ao escrever MP4, tanto na cópia direta como na conversão: não gravar uma faixa inteira antes da outra, pois o gravador nativo pode bloquear. Em Android anterior a API 25, detetar amostras de vídeo com timestamps de apresentação reordenados (B-frames) antes de iniciar a gravação direta e converter esses filmes para H.264 sem B-frames. A limitação é documentada em https://developer.android.com/reference/android/media/MediaMuxer . Manter o áudio AAC, os limites de duração e resolução. Atualizar o estado durante consulta/download/preparação e distinguir a tentativa atual do erro anterior. Validar filmes sintéticos longos, áudio como primeira faixa e H.264 com/sem B-frames, sem incluir ficheiros pessoais no código ou releases.
+
+## Versão 1.3.2 — espera de autenticação HTTP
+
+Permitir até 120 segundos para login e alteração de credenciais em hardware lento, com mensagem de processamento e botão desativado. Manter 15 segundos nas restantes operações e preservar o PBKDF2 existente. Caso o pedido expire, informar que as novas credenciais podem já estar guardadas.

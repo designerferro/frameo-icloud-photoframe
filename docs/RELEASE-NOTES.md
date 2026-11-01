@@ -1,12 +1,14 @@
-Photoframe 1.3.1 — correção da sincronização com filmes (versionCode 7).
+Photoframe 1.3.2 — acesso HTTP em molduras mais lentas (versionCode 8).
 
 Todo o código foi escrito pelo Codex. Publicação: designerferro.
 
-- Corrige bloqueios ao guardar filmes MP4 com áudio no Android 6, que impediam concluir a atualização das fotografias.
-- Intercala as faixas de áudio e vídeo e converte filmes com B-frames para H.264 compatível quando a versão Android não os pode gravar diretamente.
-- Mostra o progresso atual: consulta do álbum, download e preparação do filme. O erro da tentativa anterior deixa de aparecer durante uma nova sincronização.
-- Mensagem de falha temporária de DNS mais clara e repetição ao fim de um minuto.
+- Corrige a mensagem “A moldura não respondeu” ao iniciar sessão ou alterar credenciais quando o processamento ultrapassa 15 segundos.
+- Aguarda até dois minutos nessas operações e mostra que as credenciais estão a ser processadas.
+- Se o tempo for excedido, explica que os novos dados podem já ter sido guardados.
+- Mantém a proteção PBKDF2 e os restantes limites HTTP.
 
-Preserva o álbum, as fotografias, os filmes e as credenciais remotas. Mantém a assinatura e as funcionalidades da versão anterior.
+Preserva o álbum, fotografias, filmes, configurações e credenciais. Mantém a assinatura das releases anteriores.
 
-APK: Photoframe-v1.3.1.apk, update.json e SHA256SUMS.
+Após atualizar, recarrega a página HTTP e entra com o novo utilizador e palavra-passe que guardaste. Não é necessário apagar dados ou repetir a preparação Android.
+
+APK: Photoframe-v1.3.2.apk, update.json e SHA256SUMS.

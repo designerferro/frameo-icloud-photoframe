@@ -8,7 +8,7 @@ Aplicação Android nativa, leve, para apresentar fotografias e filmes de um **�
 
 O APK das Releases é genérico: **não contém fotografias, ligação a um álbum, credenciais Apple, token GitHub nem chave privada**. A ligação é introduzida na moldura e guardada no espaço privado da aplicação.
 
-A versão **1.3.1** corrige bloqueios na preparação de filmes com áudio no Android 6 e mostra o progresso real da sincronização. Mantém acesso remoto, ordem aleatória/por data e a ligação guardada do álbum oculta.
+A versão **1.3.2** corrige a espera no início de sessão e na alteração das credenciais HTTP em molduras mais lentas. Mantém as correções de filmes, o acesso remoto, a ordem aleatória/por data e a ligação guardada do álbum oculta.
 
 ## Fotografias e apresentação
 
@@ -77,7 +77,7 @@ Não é necessário compilar para usar a aplicação. Descarregar o APK em [Rele
 
 ```text
 adb devices -l
-adb install Photoframe-v1.3.1.apk
+adb install Photoframe-v1.3.2.apk
 adb shell am start -n pt.photoframe/.MainActivity
 ```
 
@@ -140,11 +140,11 @@ As versões são comparadas pelo inteiro **versionCode**. `versionName` e tag s�
 
 ```json
 {
-  "versionName": "1.3.1",
-  "versionCode": 7,
+  "versionName": "1.3.2",
+  "versionCode": 8,
   "repository": "designerferro/frameo-icloud-photoframe",
   "author": "Codex",
-  "apk": "Photoframe-v1.3.1.apk",
+  "apk": "Photoframe-v1.3.2.apk",
   "sha256": "DIGEST_SHA256_GERADO_A_PARTIR_DO_APK",
   "minSdk": 23
 }
@@ -220,3 +220,7 @@ Existe um `.gitignore` apenas local, que inclui a entrada `.gitignore` para se e
 ## Limitações
 
 Não é uma aplicação oficial Apple/Frameo e não substitui a atualização do Android. A sincronização usa os endpoints do site público iCloud, que podem mudar. Um álbum vazio conserva a última cópia local. Não faz flash de firmware. minSdk 23 não garante instalação em todo o Android recente: alguns sistemas bloqueiam aplicações com targetSdk antigo ou restringem arranque/instalação. O alvo principal deste projeto continua a ser Android 6. Para detalhes técnicos da versão e verificações de desenvolvimento, ver [VALIDATION.md](docs/VALIDATION.md).
+
+### Acesso HTTP em molduras mais lentas
+
+O início de sessão e a alteração do utilizador/palavra-passe podem demorar até dois minutos. Aguarda a resposta com o botão desativado. Nas versões 1.3.0 e 1.3.1, a página podia mostrar “A moldura não respondeu” após 15 segundos mesmo com as credenciais guardadas. Atualiza para 1.3.2 e recarrega a página; entra com os novos dados. Não é necessário apagar os dados ou repetir a preparação Android.

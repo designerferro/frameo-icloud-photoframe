@@ -1,5 +1,12 @@
 # Histórico
 
+## 1.3.2 — versionCode 8
+
+- Espera de até dois minutos para iniciar sessão e alterar credenciais HTTP em molduras mais lentas.
+- Mensagem de processamento e botão desativado durante o pedido.
+- Em caso de tempo excedido, indica que as novas credenciais podem já estar guardadas.
+- Mantém PBKDF2, sessões e as credenciais existentes, sem reduzir a proteção da palavra-passe.
+
 ## 1.3.1 — versionCode 7
 
 - Gravação de áudio e vídeo intercalados, evitando bloqueios do gravador MP4 no Android 6.

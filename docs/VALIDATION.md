@@ -56,3 +56,10 @@ O ensaio de vídeo inclui agora dois filmes sintéticos de 12 segundos, com o á
 A documentação Android só garante gravação de B-frames em MP4 a partir de API 25. Em versões anteriores, a aplicação examina os timestamps antes da cópia direta e recodifica quando necessário. Referência: [MediaMuxer](https://developer.android.com/reference/android/media/MediaMuxer).
 
 Resultado do ensaio em Android 6: aprovado. Filmes sintéticos de 12 segundos com e sem B-frames terminam com áudio, além dos casos de corte, redimensionamento e rotação. Reprodução/avanço/volume aprovados. Sincronização real concluída após a correção sem bloquear na preparação do filme. Dados e credenciais preservados.
+
+
+## Espera HTTP na versão 1.3.2
+
+Diagnóstico num equipamento Android 6: o cálculo PBKDF2 demorou cerca de 18 segundos, ultrapassando os 15 segundos da página anterior. O teste usa dados fictícios e não altera as credenciais.
+
+`node --test tests/remote-api.test.js` verifica login e alteração de credenciais com resposta aos 18,1 segundos, o limite de 120 segundos, a mensagem de recuperação e a manutenção dos 15 segundos nas restantes operações. Estes testes usam um relógio simulado; não constituem um ensaio completo num navegador ligado à moldura. As verificações Java/HTTP, Python, privacidade e assinatura Android 6 passaram.
