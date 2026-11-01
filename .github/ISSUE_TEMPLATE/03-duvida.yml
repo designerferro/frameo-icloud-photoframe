@@ -1,0 +1,21 @@
+name: Colocar uma dúvida
+description: Pedir esclarecimentos sobre instalação, configuração ou utilização.
+title: "[Dúvida] "
+labels: [question, needs-triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Consulta primeiro o README e as issues existentes. Não publiques ligações de álbuns, fotografias pessoais, credenciais ou dados da tua rede.
+  - type: textarea
+    id: question
+    attributes:
+      label: Qual é a tua dúvida?
+      description: Explica o que queres fazer e o que já tentaste.
+    validations:
+      required: true
+  - type: input
+    id: context
+    attributes:
+      label: Equipamento e versão (opcional)
+      description: Modelo da moldura, Android e versão do Photoframe, se conhecidos. Não incluas o número de série.

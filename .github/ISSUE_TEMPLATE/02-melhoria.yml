@@ -1,0 +1,41 @@
+name: Sugerir uma melhoria
+description: Propor uma funcionalidade nova ou melhorar uma existente.
+title: "[Melhoria] "
+labels: [enhancement, needs-triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Explica o problema que queres resolver. Uma sugestão por issue facilita a discussão e o acompanhamento.
+        Pesquisa nas issues existentes e, se já houver uma proposta semelhante, acrescenta contexto nessa conversa ou reage com 👍.
+        Não publiques ligações de álbuns, fotografias pessoais nem credenciais.
+  - type: textarea
+    id: need
+    attributes:
+      label: Que necessidade queres resolver?
+      description: Descreve uma situação concreta e quem beneficiaria da melhoria.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Como gostarias que funcionasse?
+      description: Explica o comportamento desejado, com um exemplo se possível.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas ou soluções que já experimentaste (opcional)
+  - type: input
+    id: device
+    attributes:
+      label: Equipamento e versão (opcional)
+      description: Se a proposta depender do equipamento, indica modelo, Android, versão do Photoframe e se tem root. Não incluas o número de série.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Antes de enviar
+      options:
+        - label: Pesquisei nas issues existentes para evitar propostas duplicadas.
+          required: true

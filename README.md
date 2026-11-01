@@ -225,6 +225,12 @@ Ou fazer a operação manualmente em GitHub → Releases → Draft a new release
 
 Existe um `.gitignore` apenas local, que inclui a entrada `.gitignore` para se excluir a si próprio. Não é versionado nem publicado no GitHub. SDK, chaves e diretórios de saída devem ficar fora deste repositório. O [prompt](PROMPT.md) descreve as funcionalidades e o contexto de recriação.
 
+## Problemas, sugestões e contributos
+
+Encontraste um problema ou tens uma ideia? [Abre uma issue](https://github.com/designerferro/frameo-icloud-photoframe/issues/new/choose) e escolhe **Relatar um problema**, **Sugerir uma melhoria** ou **Colocar uma dúvida**. Pesquisa primeiro nas issues existentes e não publiques ligações de álbuns, fotografias pessoais ou credenciais.
+
+Também são bem-vindas melhorias ao código e à documentação através de pull requests. Consulta o [guia de contribuição](CONTRIBUTING.md) para saber que informação incluir e como validar alterações.
+
 ## Limitações
 
 Não é uma aplicação oficial Apple/Frameo e não substitui a atualização do Android. A sincronização usa os endpoints do site público iCloud, que podem mudar. Um álbum vazio conserva a última cópia local. Não faz flash de firmware. minSdk 23 não garante instalação em todo o Android recente: alguns sistemas bloqueiam aplicações com targetSdk antigo ou restringem arranque/instalação. O alvo principal deste projeto continua a ser Android 6. Para detalhes técnicos da versão e verificações de desenvolvimento, ver [VALIDATION.md](docs/VALIDATION.md).
