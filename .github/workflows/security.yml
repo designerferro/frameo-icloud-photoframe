@@ -17,3 +17,5 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'test_*.py'
       - name: Check source, version policy and complete history
         run: python3 tools/check.py --jdk "$JAVA_HOME_17_X64"
+      - name: Test slow HTTP authentication
+        run: node --test tests/remote-api.test.js

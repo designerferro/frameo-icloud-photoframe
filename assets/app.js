@@ -5,8 +5,9 @@ const message=(text,error=false)=>{byId('message').textContent=text;byId('messag
 async function api(path,data){
  const options={credentials:'same-origin',cache:'no-store',headers:{}};
  if(data!==undefined){options.method='POST';options.headers['Content-Type']='application/json';options.headers['X-CSRF-Token']=csrf;options.body=JSON.stringify(data);}
- const controller=new AbortController();options.signal=controller.signal;const timeout=setTimeout(()=>controller.abort(),15000);
- let response;try{response=await fetch(path,options);}catch(error){throw new Error('A moldura não respondeu. Verifica a ligação e tenta novamente.');}finally{clearTimeout(timeout);}
+ const credentials=path==='/api/login'||path==='/api/credentials';
+ const controller=new AbortController();options.signal=controller.signal;const timeout=setTimeout(()=>controller.abort(),credentials?120000:15000);
+ let response;try{response=await fetch(path,options);}catch(error){throw new Error(controller.signal.aborted&&credentials?'A verificação das credenciais demorou demasiado. Se estavas a alterá-las, tenta entrar com os novos dados: podem já ter sido guardados.':'A moldura não respondeu. Verifica a ligação e tenta novamente.');}finally{clearTimeout(timeout);}
  const body=await response.json();
  if(!response.ok||body.error){if(response.status===401)show('login');throw new Error(body.error||'Não foi possível executar a operação.');}return body;
 }
@@ -22,7 +23,7 @@ function render(state,fill=true){
 }
 async function refresh(fill=true){render(await api('/api/state'),fill);}
 async function openSession(){const session=await api('/api/session');csrf=session.csrf;first=session.firstAccess;byId('cancelCredentials').hidden=first;show(first?'credentials':'configuration');if(!first)await refresh();}
-function guarded(action){return async event=>{event.preventDefault();const button=event.submitter||event.currentTarget;if(button.tagName==='BUTTON')button.disabled=true;try{await action(event);}catch(error){message(error.message,true);}finally{button.disabled=false;}};}
+function guarded(action){return async event=>{event.preventDefault();const button=event.submitter||event.currentTarget;if(button.tagName==='BUTTON')button.disabled=true;if(event.currentTarget.id==='loginForm'||event.currentTarget.id==='credentialsForm')message('A processar as credenciais… Esta operação pode demorar até dois minutos.');try{await action(event);}catch(error){message(error.message,true);}finally{button.disabled=false;}};}
 byId('loginForm').addEventListener('submit',guarded(async()=>{const data=formData('loginForm');const session=await api('/api/login',{username:data.get('username'),password:data.get('password')});byId('loginForm').reset();csrf=session.csrf;await openSession();message(session.firstAccess?'Altera as credenciais para continuar.':'Sessão iniciada.');}));
 byId('credentialsForm').addEventListener('submit',guarded(async()=>{const data=formData('credentialsForm');if(data.get('password')!==data.get('confirm'))throw new Error('As palavras-passe não coincidem.');await api('/api/credentials',{username:data.get('username'),password:data.get('password')});byId('credentialsForm').reset();csrf='';show('login');message('Credenciais guardadas. Inicia sessão com os novos dados.');}));
 byId('settingsForm').addEventListener('submit',guarded(async()=>{const data=formData('settingsForm');if(!data.has('remoteEnabled')&&!confirm('Desativar o acesso remoto? Só poderás voltar a ativá-lo na moldura.'))return;const state=await api('/api/settings',{crop:data.get('crop')==='true',orientation:Number(data.get('orientation')),order:data.get('order'),videoSeconds:Number(data.get('videoSeconds')),volume:Number(data.get('volume')),autoUpdate:data.has('autoUpdate'),remoteEnabled:data.has('remoteEnabled')});render(state);message('Configurações guardadas na moldura.');}));
