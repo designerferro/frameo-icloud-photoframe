@@ -52,3 +52,7 @@ Permitir até 120 segundos para login e alteração de credenciais em hardware l
 ## Versão 1.3.3 — instalação root por sessão
 
 Enviar o APK privado e verificado com pm install-create -r, install-write pela entrada padrão e install-commit. Confirmar a resposta final, abandonar sessões falhadas e nunca expor o ficheiro a outros utilizadores. Preservar dados, assinatura, limites e credenciais.
+
+
+## Horário do ecrã (1.4.0)
+Incluir horário diário local/remoto, início/fim HH:mm distintos, intervalos pela meia-noite, desativado por omissão. Usar root para dormir/despertar realmente o ecrã e AlarmManager RTC_WAKEUP exato, sem wakelock noturno. Reprogramar após arranque, atualização, mudança de hora/fuso. Pausar filmes/som no descanso e conservar acesso remoto. Indicar falha root e documentar limitações do fabricante.

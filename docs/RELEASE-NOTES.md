@@ -1,15 +1,16 @@
-Photoframe 1.3.3 — correção da instalação automática com root (versionCode 9).
+Photoframe 1.4.0 — horário diário do ecrã (versionCode 10).
 
 Todo o código foi escrito pelo Codex. Publicação: designerferro.
 
-- Corrige INSTALL_FAILED_INVALID_URI no Android 6 ao instalar um APK numa pasta privada.
-- Envia o APK verificado diretamente para uma sessão do instalador Android, sem o tornar público.
-- Confirma a conclusão da sessão e abandona sessões que falhem.
-- Mantém o estado da operação quando se repete um pedido e confirma a instalação após atualizar.
-- Inclui a correção do login HTTP em molduras mais lentas, da versão 1.3.2.
+- Novo menu “Horário do ecrã” e configuração equivalente no acesso remoto.
+- Define horas distintas para desligar e voltar a ligar, incluindo intervalos que atravessam a meia-noite.
+- Usa a hora e o fuso horário da moldura; reprograma após mudança da hora, reinício e atualização.
+- Desliga realmente o ecrã com root e programa um alarme exato para voltar a ligá-lo, sem manter o processador acordado durante toda a noite.
+- Interrompe a apresentação e o som durante o período de descanso. O acesso remoto mantém-se disponível se estiver ativado e a rede permitir.
+- Horário desligado por omissão. Guarda as escolhas e apresenta falhas de acesso root no estado do horário.
 
-Preserva álbum, fotografias, filmes, configurações e credenciais. Mantém a assinatura anterior.
+Requer root autorizado e suporte do fabricante aos comandos Android de dormir/despertar. Sem root, não é possível garantir o desligar físico do painel. Não desliga a alimentação da moldura. A precisão em Android recentes depende das restrições de alarmes do sistema; alvo principal: Android 6.
 
-Se o atualizador de uma versão anterior falhar, instalar este APK com adb install -r Photoframe-v1.3.3.apk. Não desinstalar a aplicação nem apagar dados.
+Preserva álbum, fotografias, filmes, configurações, credenciais e a assinatura anterior.
 
-APK: Photoframe-v1.3.3.apk, update.json e SHA256SUMS.
+APK: Photoframe-v1.4.0.apk, update.json e SHA256SUMS.
