@@ -72,3 +72,7 @@ Falha anterior reproduzida em Android 6: `pm install -r` devolve `INSTALL_FAILED
 
 ## 1.4.0 — horário
 Testes puros verificam os 1440 minutos de intervalos diurnos/noturnos, extremos inclusivo/exclusivo, validação HH:mm e próximo alarme. Compilação Android API 23. O desligar físico e o despertar dependem do root e do equipamento; confirmar na moldura antes de confiar no horário.
+
+
+## 1.4.1 — navegação por toque
+O teste Android `NavigationRunner` injeta toques reais em fotografias e filmes, incluindo margens, centro, toques rápidos consecutivos, passagem entre extremos, recuo na ordem aleatória e toque prolongado para o menu. Executar o auxiliar `tools/device_video_test.py` com `--navigation-only` e os argumentos normais de SDK/JDK/chave/APK. Usa imagens e filme sintéticos e repõe a apresentação e as preferências no fim.

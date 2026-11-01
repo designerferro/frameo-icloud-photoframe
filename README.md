@@ -8,11 +8,11 @@ Aplicação Android nativa, leve, para apresentar fotografias e filmes de um **�
 
 O APK das Releases é genérico: **não contém fotografias, ligação a um álbum, credenciais Apple, token GitHub nem chave privada**. A ligação é introduzida na moldura e guardada no espaço privado da aplicação.
 
-A versão **1.4.0** acrescenta um horário diário para desligar e voltar a ligar o ecrã, configurável na moldura e pelo acesso remoto.
+A versão **1.4.1** acrescenta navegação por toque: metade direita para o item seguinte; metade esquerda para o anterior, em fotografias e filmes.
 
 ## Fotografias e apresentação
 
-- Mudança a cada 15 segundos; toque avança.
+- Mudança a cada 15 segundos; toque na metade direita avança e na esquerda recua, em fotografias e filmes, incluindo as margens do ecrã. Recuar a partir do primeiro item mostra o último da sequência atual, sem voltar a baralhar a ordem aleatória. Cada toque reinicia o tempo de apresentação; um filme selecionado começa do início.
 - Toque prolongado, ou Back, abre o menu.
 - Sincronização ao abrir e a cada 15 minutos enquanto a apresentação está em primeiro plano; em falha, tenta de novo em 1 minuto.
 - Menu para apagar a ligação do álbum e todas as fotografias locais; ao mudar de álbum, a limpeza anterior está selecionada por defeito.
@@ -85,7 +85,7 @@ Não é necessário compilar para usar a aplicação. Descarregar o APK em [Rele
 
 ```text
 adb devices -l
-adb install Photoframe-v1.4.0.apk
+adb install Photoframe-v1.4.1.apk
 adb shell am start -n pt.photoframe/.MainActivity
 ```
 
@@ -148,11 +148,11 @@ As versões são comparadas pelo inteiro **versionCode**. `versionName` e tag s�
 
 ```json
 {
-  "versionName": "1.4.0",
-  "versionCode": 10,
+  "versionName": "1.4.1",
+  "versionCode": 11,
   "repository": "designerferro/frameo-icloud-photoframe",
   "author": "Codex",
-  "apk": "Photoframe-v1.4.0.apk",
+  "apk": "Photoframe-v1.4.1.apk",
   "sha256": "DIGEST_SHA256_GERADO_A_PARTIR_DO_APK",
   "minSdk": 23
 }
@@ -241,4 +241,4 @@ O início de sessão e a alteração do utilizador/palavra-passe podem demorar a
 
 ### Instalação automática com root no Android 6
 
-A versão 1.3.3 envia o APK privado diretamente para uma sessão do instalador Android. Corrige `INSTALL_FAILED_INVALID_URI` das versões anteriores. Se a versão antiga não conseguir atualizar-se, instala o APK 1.3.3 por ADB com `adb install -r Photoframe-v1.4.0.apk`, sem desinstalar ou apagar os dados. Uma mensagem de operação em curso significa que deves aguardar a tentativa atual.
+A versão 1.3.3 envia o APK privado diretamente para uma sessão do instalador Android. Corrige `INSTALL_FAILED_INVALID_URI` das versões anteriores. Se a versão antiga não conseguir atualizar-se, instala o APK 1.3.3 por ADB com `adb install -r Photoframe-v1.4.1.apk`, sem desinstalar ou apagar os dados. Uma mensagem de operação em curso significa que deves aguardar a tentativa atual.

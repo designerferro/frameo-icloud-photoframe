@@ -27,6 +27,7 @@ public class MainActivity extends Activity {
     final ArrayList<File> slides = new ArrayList<>();
     ImageView photo, backdrop;
     VideoView video;
+    GestureDetector navigationGestures;
     MediaPlayer playing;
     final Runnable videoLimit = () -> next();
     TextView placeholder;
@@ -64,22 +65,20 @@ public class MainActivity extends Activity {
         });
         video.setOnCompletionListener(mp->next());
         video.setOnErrorListener((mp,what,extra)->{stopVideo();status="Vídeo incompatível; a avançar.";if(resumed)ui.postDelayed(advance,1000);return true;});
-        video.setOnTouchListener(new View.OnTouchListener(){
-            final GestureDetector gestures=new GestureDetector(MainActivity.this,new GestureDetector.SimpleOnGestureListener(){
-                @Override public boolean onDown(android.view.MotionEvent e){return true;}
-                @Override public boolean onSingleTapUp(android.view.MotionEvent e){next();return true;}
-                @Override public void onLongPress(android.view.MotionEvent e){menu();}
-            });
-            public boolean onTouch(View v,android.view.MotionEvent e){return gestures.onTouchEvent(e);}
+        navigationGestures=new GestureDetector(this,new GestureDetector.SimpleOnGestureListener(){
+            @Override public boolean onDown(MotionEvent e){return true;}
+            @Override public boolean onSingleTapUp(MotionEvent e){
+                if(e.getX()<surface.getWidth()/2f)previous();else next();return true;
+            }
+            @Override public void onLongPress(MotionEvent e){menu();}
         });
+        navigationGestures.setOnDoubleTapListener(null);
         placeholder=new TextView(this);placeholder.setTextColor(Color.WHITE);placeholder.setGravity(Gravity.CENTER);
         placeholder.setText("Photoframe\nConfigura um álbum no menu (toque prolongado).");
         surface.addView(placeholder,new FrameLayout.LayoutParams(-1,-1));
         setContentView(surface);
         updater=new AppUpdater(this,updaterWorker);
         immersive();
-        photo.setOnClickListener(v -> { next(); });
-        photo.setOnLongClickListener(v -> { menu(); return true; });
         placeholder.setOnLongClickListener(v->{menu();return true;});
         placeholder.setOnClickListener(v->configureAlbum());
         cache = new File(getFilesDir(),"photos"); cache.mkdirs();
@@ -94,6 +93,13 @@ public class MainActivity extends Activity {
         ScreenReceiver.refresh(this);
         next();
         if(token==null)ui.post(()->configureAlbum());
+    }
+    @Override public boolean dispatchTouchEvent(MotionEvent event){
+        // Use the whole activity width, including the margins around a fitted film.
+        // Dialogs have their own window and retain their usual touch handling.
+        if(navigationGestures!=null&&!slides.isEmpty()&&placeholder.getVisibility()==View.GONE)
+            return navigationGestures.onTouchEvent(event);
+        return super.dispatchTouchEvent(event);
     }
     void immersive(){ getWindow().getDecorView().setSystemUiVisibility(5894); }
     @Override public void onWindowFocusChanged(boolean focused){ super.onWindowFocusChanged(focused); if(focused) immersive(); }
@@ -137,6 +143,15 @@ public class MainActivity extends Activity {
             if(slides.size()>1&&slides.get(0).equals(previous))Collections.swap(slides,0,1);
         }
         index=(index+1)%slides.size();
+        showCurrent();
+    }
+    void previous(){
+        ui.removeCallbacks(advance);stopVideo();
+        if(slides.isEmpty()||ScreenReceiver.sleeping(this))return;
+        index=index<0?slides.size()-1:(index+slides.size()-1)%slides.size();
+        showCurrent();
+    }
+    void showCurrent(){
         File slide=slides.get(index);
         if(slide.getName().endsWith(".mp4")){
             if(!resumed)return;

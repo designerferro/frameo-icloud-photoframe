@@ -1,3 +1,7 @@
+# 1.4.1 (versionCode 11)
+
+Única nova funcionalidade: toque na metade direita avança; na esquerda recua na sequência atual, em fotografias e filmes. Inclui margens dos filmes e mantém toque prolongado para o menu.
+
 # 1.4.0 (versionCode 10)
 
 Horário diário configurável para desligar e ligar o ecrã com root, no menu local e no acesso remoto. Inclui intervalos noturnos, alarme de despertar e reposição após reinício/mudança da hora. Desativado por omissão.

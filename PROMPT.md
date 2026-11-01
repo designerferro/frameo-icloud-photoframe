@@ -56,3 +56,7 @@ Enviar o APK privado e verificado com pm install-create -r, install-write pela e
 
 ## Horário do ecrã (1.4.0)
 Incluir horário diário local/remoto, início/fim HH:mm distintos, intervalos pela meia-noite, desativado por omissão. Usar root para dormir/despertar realmente o ecrã e AlarmManager RTC_WAKEUP exato, sem wakelock noturno. Reprogramar após arranque, atualização, mudança de hora/fuso. Pausar filmes/som no descanso e conservar acesso remoto. Indicar falha root e documentar limitações do fabricante.
+
+
+## Navegação por toque (1.4.1)
+Na apresentação, tocar na metade direita do ecrã avança e na esquerda recua na sequência atual. Aplicar a fotografias e filmes, incluindo margens e ambas as orientações. Recuar no primeiro mostra o último, sem baralhar novamente ao recuar. Reiniciar temporizadores e reprodução do filme selecionado. Preservar toque prolongado para o menu e interações dos diálogos.
