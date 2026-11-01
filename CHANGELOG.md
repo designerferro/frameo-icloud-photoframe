@@ -1,5 +1,14 @@
 # Histórico
 
+## 1.2.0 — versionCode 4
+
+- Fotografias e filmes na mesma apresentação offline.
+- Preparação MP4/H.264 local, ajustada ao ecrã quando necessário, com áudio AAC.
+- Duração máxima de 30 segundos por omissão, configurável até ao teto calculado pelo espaço disponível.
+- Volume persistente de 0 a 10; 0 sem som e 10 máximo.
+- Downloads de filmes para ficheiro com orçamento de armazenamento.
+- Autoria integral do código pelo Codex destacada na apresentação pública.
+
 ## 1.1.1 — versionCode 3
 
 - Preparação de instalação root em pasta exclusiva e privada, com limpeza automática.

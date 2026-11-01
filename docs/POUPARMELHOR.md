@@ -1,8 +1,8 @@
-**Dar nova vida a uma moldura Frameo: fotografias do iCloud, com atualização automática**
+**Dar nova vida a uma moldura Frameo: fotografias e filmes do iCloud, com atualização automática**
 
 Quem tem uma moldura digital Android antiga pode conseguir reaproveitá-la para apresentar fotografias de um álbum partilhado do iCloud, sem manter um computador ligado.
 
-A solução chama-se **Photoframe**. O APK foi desenvolvido pelo **Codex**, e o código, o prompt para recriar o projeto e as instruções estão na conta **designerferro** do GitHub:
+A solução chama-se **Photoframe**. **Todo o código foi escrito pelo Codex**, incluindo o APK e as ferramentas do projeto, e o código, o prompt para recriar o projeto e as instruções estão na conta **designerferro** do GitHub:
 
 - [Código e guia completo](https://github.com/designerferro/frameo-icloud-photoframe)
 - [Descarregar o APK mais recente](https://github.com/designerferro/frameo-icloud-photoframe/releases/latest)
@@ -10,9 +10,11 @@ A solução chama-se **Photoframe**. O APK foi desenvolvido pelo **Codex**, e o 
 
 ### O que faz
 
-Mostra fotografias em ecrã inteiro, muda de imagem a cada 15 segundos e procura novidades no álbum a cada 15 minutos. Guarda uma cópia na própria moldura, pelo que continua a mostrar as fotografias quando não há internet.
+Mostra fotografias e filmes em ecrã inteiro, muda de imagem a cada 15 segundos e procura novidades no álbum a cada 15 minutos. Guarda uma cópia na própria moldura, pelo que continua a mostrar as fotografias quando não há internet.
 
 Para preencher o ecrã, permite escolher entre fotografia inteira sobre um fundo suave da própria imagem e preenchimento com recorte. Funciona na horizontal e na vertical, com opção para fixar a orientação quando a moldura não tem sensor de rotação.
+
+Os filmes têm um limite de 30 segundos por omissão, ajustável até ao máximo calculado pelo espaço livre da moldura. O volume também é configurável: 0 sem som, 10 máximo. Quando necessário, o vídeo é convertido na moldura para uma resolução adaptada ao ecrã, usando os codecs Android disponíveis.
 
 Um toque avança. Um toque prolongado abre o menu: atualizar fotografias, configurar o álbum, escolher a apresentação e consultar ou atualizar o APK.
 
@@ -128,6 +130,6 @@ Uma compilação própria deve preservar a sua chave de assinatura para futuras 
 
 ### Limitações a conhecer
 
-Esta solução apresenta fotografias, não vídeos. Não é uma aplicação oficial Apple ou Frameo. A sincronização depende dos pedidos usados pelo site público do iCloud; alterações nesse serviço podem obrigar a atualizar o código. Também não transforma um Android antigo num sistema atualizado.
+Esta solução apresenta fotografias e filmes compatíveis com os codecs Android da moldura. Não é uma aplicação oficial Apple ou Frameo. A sincronização depende dos pedidos usados pelo site público do iCloud; alterações nesse serviço podem obrigar a atualizar o código. Também não transforma um Android antigo num sistema atualizado.
 
 É uma forma de voltar a dar uso a uma moldura que já temos, com controlo sobre o código e um caminho para regressar ao Frameo.
