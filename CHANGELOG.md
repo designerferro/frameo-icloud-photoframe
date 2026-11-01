@@ -1,6 +1,6 @@
 # Histórico
 
-## Próxima versão — alterações na fonte
+## 1.1.1 — versionCode 3
 
 - Preparação de instalação root em pasta exclusiva e privada, com limpeza automática.
 - Ação para apagar álbum e cache; limpeza selecionada por defeito ao mudar de álbum.
