@@ -2,7 +2,7 @@
 
 Este procedimento usa os mesmos ficheiros do projeto. Requer JDK 17 no PATH, Python 3 e os arquivos Android organizados como descrito no README. Todos os diretórios de saída/chaves ficam fora do código.
 
-Versão desta fonte: `1.3.2`, versionCode `8`. Para uma versão futura, atualizar primeiro `VERSION.json` e `AndroidManifest.xml` e adaptar o nome final. As bibliotecas Android 23 contêm as APIs de compilação; os executáveis Android devem ser os próprios do sistema do computador.
+Versão desta fonte: `1.3.3`, versionCode `9`. Para uma versão futura, atualizar primeiro `VERSION.json` e `AndroidManifest.xml` e adaptar o nome final. As bibliotecas Android 23 contêm as APIs de compilação; os executáveis Android devem ser os próprios do sistema do computador.
 
 ## Variáveis e pastas
 
@@ -79,16 +79,16 @@ GNU/Linux/macOS:
 
 ```sh
 keytool -genkeypair -keystore "$PhotoOut/photoframe-signing.p12" -alias photoframe -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Codex Photoframe local build"
-java -jar "$PhotoBt/lib/apksigner.jar" sign --ks "$PhotoOut/photoframe-signing.p12" --ks-key-alias photoframe --out "$PhotoOut/Photoframe-v1.3.2.apk" "$PhotoOut/aligned.apk"
-java -jar "$PhotoBt/lib/apksigner.jar" verify --verbose --print-certs "$PhotoOut/Photoframe-v1.3.2.apk"
+java -jar "$PhotoBt/lib/apksigner.jar" sign --ks "$PhotoOut/photoframe-signing.p12" --ks-key-alias photoframe --out "$PhotoOut/Photoframe-v1.3.3.apk" "$PhotoOut/aligned.apk"
+java -jar "$PhotoBt/lib/apksigner.jar" verify --verbose --print-certs "$PhotoOut/Photoframe-v1.3.3.apk"
 ```
 
 Windows PowerShell:
 
 ```powershell
 keytool -genkeypair -keystore "$PhotoOut\photoframe-signing.p12" -alias photoframe -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Codex Photoframe local build"
-java -jar "$PhotoBt\lib\apksigner.jar" sign --ks "$PhotoOut\photoframe-signing.p12" --ks-key-alias photoframe --out "$PhotoOut\Photoframe-v1.3.2.apk" "$PhotoOut\aligned.apk"
-java -jar "$PhotoBt\lib\apksigner.jar" verify --verbose --print-certs "$PhotoOut\Photoframe-v1.3.2.apk"
+java -jar "$PhotoBt\lib\apksigner.jar" sign --ks "$PhotoOut\photoframe-signing.p12" --ks-key-alias photoframe --out "$PhotoOut\Photoframe-v1.3.3.apk" "$PhotoOut\aligned.apk"
+java -jar "$PhotoBt\lib\apksigner.jar" verify --verbose --print-certs "$PhotoOut\Photoframe-v1.3.3.apk"
 ```
 
 Se a chave já existe, saltar **apenas** o comando `keytool -genkeypair`. Não gerar outra chave para uma atualização.

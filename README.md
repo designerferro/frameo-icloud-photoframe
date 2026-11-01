@@ -8,7 +8,7 @@ Aplicação Android nativa, leve, para apresentar fotografias e filmes de um **�
 
 O APK das Releases é genérico: **não contém fotografias, ligação a um álbum, credenciais Apple, token GitHub nem chave privada**. A ligação é introduzida na moldura e guardada no espaço privado da aplicação.
 
-A versão **1.3.2** corrige a espera no início de sessão e na alteração das credenciais HTTP em molduras mais lentas. Mantém as correções de filmes, o acesso remoto, a ordem aleatória/por data e a ligação guardada do álbum oculta.
+A versão **1.3.3** corrige a instalação automática com root no Android 6, preservando a espera alargada do login HTTP, os dados e as credenciais.
 
 ## Fotografias e apresentação
 
@@ -77,7 +77,7 @@ Não é necessário compilar para usar a aplicação. Descarregar o APK em [Rele
 
 ```text
 adb devices -l
-adb install Photoframe-v1.3.2.apk
+adb install Photoframe-v1.3.3.apk
 adb shell am start -n pt.photoframe/.MainActivity
 ```
 
@@ -132,7 +132,7 @@ No menu de atualização das fotografias aparecem:
 - **Procurar / forçar atualização do APK**: ignora o intervalo automático. Se já estiver instalada a mesma release, permite confirmar uma reinstalação.
 - Opção para ligar/desligar as atualizações automáticas do APK.
 
-A verificação automática ocorre ao abrir, respeitando um intervalo de 6 horas, e a cada 6 horas enquanto a apresentação está aberta. Não é um serviço de segundo plano nem atualiza com a moldura desligada. Com root, o APK verificado é preparado numa pasta exclusiva e privada, removida após `pm install -r`; é necessário `mktemp` no Android. Sem root, abre a confirmação normal do instalador Android. Não se contornam autorizações do sistema.
+A verificação automática ocorre ao abrir, respeitando um intervalo de 6 horas, e a cada 6 horas enquanto a apresentação está aberta. Não é um serviço de segundo plano nem atualiza com a moldura desligada. Com root, o APK verificado e privado é enviado diretamente para uma sessão do instalador Android, sem expor o ficheiro a outras aplicações. Sem root, abre a confirmação normal do instalador Android. Não se contornam autorizações do sistema.
 
 Origem: `https://api.github.com/repos/designerferro/frameo-icloud-photoframe/releases/latest`. A aplicação valida release estável, nome/tag/repositório, SHA-256, identidade interna do pacote, versão e assinatura. Não permite downgrade nem atualização por uma chave diferente. O ContentProvider de instalação só partilha o APK verificado, com uma autorização temporária de leitura.
 
@@ -140,11 +140,11 @@ As versões são comparadas pelo inteiro **versionCode**. `versionName` e tag s�
 
 ```json
 {
-  "versionName": "1.3.2",
-  "versionCode": 8,
+  "versionName": "1.3.3",
+  "versionCode": 9,
   "repository": "designerferro/frameo-icloud-photoframe",
   "author": "Codex",
-  "apk": "Photoframe-v1.3.2.apk",
+  "apk": "Photoframe-v1.3.3.apk",
   "sha256": "DIGEST_SHA256_GERADO_A_PARTIR_DO_APK",
   "minSdk": 23
 }
@@ -223,4 +223,8 @@ Não é uma aplicação oficial Apple/Frameo e não substitui a atualização do
 
 ### Acesso HTTP em molduras mais lentas
 
-O início de sessão e a alteração do utilizador/palavra-passe podem demorar até dois minutos. Aguarda a resposta com o botão desativado. Nas versões 1.3.0 e 1.3.1, a página podia mostrar “A moldura não respondeu” após 15 segundos mesmo com as credenciais guardadas. Atualiza para 1.3.2 e recarrega a página; entra com os novos dados. Não é necessário apagar os dados ou repetir a preparação Android.
+O início de sessão e a alteração do utilizador/palavra-passe podem demorar até dois minutos. Aguarda a resposta com o botão desativado. Nas versões 1.3.0 e 1.3.1, a página podia mostrar “A moldura não respondeu” após 15 segundos mesmo com as credenciais guardadas. Atualiza para 1.3.3 e recarrega a página; entra com os novos dados. Não é necessário apagar os dados ou repetir a preparação Android.
+
+### Instalação automática com root no Android 6
+
+A versão 1.3.3 envia o APK privado diretamente para uma sessão do instalador Android. Corrige `INSTALL_FAILED_INVALID_URI` das versões anteriores. Se a versão antiga não conseguir atualizar-se, instala o APK 1.3.3 por ADB com `adb install -r Photoframe-v1.3.3.apk`, sem desinstalar ou apagar os dados. Uma mensagem de operação em curso significa que deves aguardar a tentativa atual.
