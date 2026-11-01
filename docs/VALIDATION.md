@@ -14,4 +14,12 @@ Este registo técnico acompanha o código; não faz parte do artigo Pouparmelhor
 
 O auxiliar é portável por seleção do arquivo oficial de cada sistema e uso de subprocessos sem shell. Execução nativa Windows e GNU/Linux não foi realizada nesta sessão; os passos e comandos manuais estão documentados para esses sistemas. O instalador Android sem root também requer verificação num equipamento sem root.
 
-As verificações de atualização pela release real serão acrescentadas quando os assets estiverem publicados. Não é possível concluir esse percurso antes de existir a origem de atualização.
+## Percurso com a release pública
+
+- Release estável `v1.1.0` publicada em designerferro/frameo-icloud-photoframe, com APK, update.json e SHA256SUMS. O endpoint releases/latest devolveu a tag e os três assets esperados.
+- A opção manual mostrou instalado 1.1.0 (2) e GitHub 1.1.0 (2), oferecendo reinstalação explícita da mesma versão.
+- Reinstalação pelo próprio menu concluída com root; lastUpdateTime mudou e a aplicação retomou a apresentação com seis fotografias e o mesmo álbum.
+- Para validar a subida automática, foi compilada **apenas localmente** uma variante 1.0.9 (versionCode 1), com o mesmo código e chave. Não foi publicada. O temporizador de consulta foi reiniciado, sem mudar o álbum, e a aplicação foi reaberta. Descarregou e instalou sozinha a release pública 1.1.0 (2), retomando as seis fotografias. A moldura ficou na release pública 1.1.0.
+- O auxiliar setup.py também foi executado em macOS: reconheceu os pacotes existentes, descarregou Platform Tools oficial e verificou o checksum do índice Google.
+
+A fonte associada à tag v1.1.0 é o commit da publicação inicial. Este registo posterior documenta o teste que depende de a release já estar publicada; não altera o APK dessa tag.

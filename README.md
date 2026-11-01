@@ -176,4 +176,4 @@ Não existe `.gitignore`, por pedido do responsável pelo projeto. SDK, chaves e
 
 ## Limitações
 
-Não é uma aplicação oficial Apple/Frameo e não substitui a atualização do Android. A sincronização usa os endpoints do site público iCloud, que podem mudar. Vídeos não são reproduzidos. Um álbum vazio conserva a última cópia local. Não faz flash de firmware. Para detalhes técnicos da versão e verificações de desenvolvimento, ver [VALIDATION.md](docs/VALIDATION.md).
+Não é uma aplicação oficial Apple/Frameo e não substitui a atualização do Android. A sincronização usa os endpoints do site público iCloud, que podem mudar. Vídeos não são reproduzidos. Um álbum vazio conserva a última cópia local. Não faz flash de firmware. minSdk 23 não garante instalação em todo o Android recente: alguns sistemas bloqueiam aplicações com targetSdk antigo ou restringem arranque/instalação. O alvo principal deste projeto continua a ser Android 6. Para detalhes técnicos da versão e verificações de desenvolvimento, ver [VALIDATION.md](docs/VALIDATION.md).
