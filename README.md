@@ -4,15 +4,18 @@ Autor técnico do código e do APK: **Codex**. Publicação e manutenção: **[d
 
 [Descarregar a última release](https://github.com/designerferro/frameo-icloud-photoframe/releases/latest) · [Prompt de recriação](PROMPT.md) · [Compilar manualmente](docs/BUILD-MANUAL.md) · [Histórico](CHANGELOG.md)
 
-Aplicação Android nativa, leve, para apresentar fotografias de um **Álbum partilhado público iCloud**. Compatível com Android 6/API 23 ou superior. O alvo inicial é a Apveelveer AVE-107/RK312x; não há um método universal de desbloqueio para outras molduras. O funcionamento de arranque em versões Android mais recentes pode depender das restrições do fabricante.
+Aplicação Android nativa, leve, para apresentar fotografias de um **Álbum partilhado público iCloud**. Compatível com Android 6/API 23 ou superior. Uma referência de compatibilidade é a Apveelveer AVE-107/RK312x; não há um método universal de desbloqueio para outras molduras. O funcionamento de arranque em versões Android mais recentes pode depender das restrições do fabricante.
 
 O APK das Releases é genérico: **não contém fotografias, ligação a um álbum, credenciais Apple, token GitHub nem chave privada**. A ligação é introduzida na moldura e guardada no espaço privado da aplicação.
+
+As melhorias de segurança e limpeza de dados na branch `main` destinam-se à próxima versão. O APK da release `v1.1.0` mantém o comportamento original até ser publicada uma nova release validada.
 
 ## Fotografias e apresentação
 
 - Mudança a cada 15 segundos; toque avança.
 - Toque prolongado, ou Back, abre o menu.
 - Sincronização ao abrir e a cada 15 minutos enquanto a apresentação está em primeiro plano; em falha, tenta de novo em 1 minuto.
+- Menu para apagar a ligação do álbum e todas as fotografias locais; ao mudar de álbum, a limpeza anterior está selecionada por defeito.
 - Cache privada para apresentar as fotografias sem internet. Se a sincronização falhar ou o álbum estiver vazio, mantém a última cópia.
 - Sem barras pretas acrescentadas pelo layout: fotografia inteira sobre fundo suave da própria imagem, ou preenchimento com recorte. O primeiro plano mantém a proporção.
 - Orientação automática, horizontal ou vertical. A opção manual é útil em molduras sem sensor de rotação.
@@ -54,7 +57,7 @@ adb shell "su -c id"
 adb shell pm list packages frameo
 ```
 
-Na AVE-107, o pacote observado foi `net.frameo.frame`. Se for diferente, adaptar. Para comandos com argumentos dentro de `su -c`, as aspas seguintes preservam a linha no Android tanto em PowerShell como em shells POSIX:
+O pacote Frameo pode ser `net.frameo.frame`. Se for diferente, adaptar. Para comandos com argumentos dentro de `su -c`, as aspas seguintes preservam a linha no Android tanto em PowerShell como em shells POSIX:
 
 ```text
 adb shell "su -c 'pm disable-user --user 0 net.frameo.frame'"
@@ -89,7 +92,7 @@ No menu de atualização das fotografias aparecem:
 - **Procurar / forçar atualização do APK**: ignora o intervalo automático. Se já estiver instalada a mesma release, permite confirmar uma reinstalação.
 - Opção para ligar/desligar as atualizações automáticas do APK.
 
-A verificação automática ocorre ao abrir, respeitando um intervalo de 6 horas, e a cada 6 horas enquanto a apresentação está aberta. Não é um serviço de segundo plano nem atualiza com a moldura desligada. Com root, o APK verificado é instalado por `pm install -r`. Sem root, abre a confirmação normal do instalador Android. Não se contornam autorizações do sistema.
+A verificação automática ocorre ao abrir, respeitando um intervalo de 6 horas, e a cada 6 horas enquanto a apresentação está aberta. Não é um serviço de segundo plano nem atualiza com a moldura desligada. Com root, o APK verificado é preparado numa pasta exclusiva e privada, removida após `pm install -r`; é necessário `mktemp` no Android. Sem root, abre a confirmação normal do instalador Android. Não se contornam autorizações do sistema.
 
 Origem: `https://api.github.com/repos/designerferro/frameo-icloud-photoframe/releases/latest`. A aplicação valida release estável, nome/tag/repositório, SHA-256, identidade interna do pacote, versão e assinatura. Não permite downgrade nem atualização por uma chave diferente. O ContentProvider de instalação só partilha o APK verificado, com uma autorização temporária de leitura.
 

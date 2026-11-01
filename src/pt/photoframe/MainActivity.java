@@ -60,21 +60,9 @@ public class MainActivity extends Activity {
         cache = new File(getFilesDir(),"photos"); cache.mkdirs();
         try {
             token=preferences.getString("albumToken",null);
-            // Read legacy local builds if present; public builds never bundle an album.
-            if(token==null)try{
-                token=new JSONObject(new String(read(getAssets().open("album.json"),16384),"UTF-8")).getString("token");
-                preferences.edit().putString("albumToken",token).apply();
-            }catch(IOException ignored){}
             if(token!=null)base=albumBase(token);
             File manifest = new File(getFilesDir(),"slides.json");
             if(manifest.exists()) loadManifest(new JSONArray(new String(read(new FileInputStream(manifest),2000000),"UTF-8")));
-            if(slides.isEmpty()) {
-                for(String name:getAssets().list("")) if(name.startsWith("seed-")&&name.endsWith(".jpg")) {
-                    File f=new File(cache,name);
-                    if(!f.exists()) write(f,read(getAssets().open(name),20000000));
-                    slides.add(f);
-                }
-            }
         } catch(Exception e) { status="Erro de configuração: "+e.getClass().getSimpleName(); }
         next();
         if(token==null)ui.post(()->configureAlbum());
@@ -103,6 +91,7 @@ public class MainActivity extends Activity {
         addButton(options,"Atualizar fotografias agora",()->sync());
         addButton(options,"Procurar / forçar atualização do APK",()->updater.check(true));
         addButton(options,"Configurar álbum iCloud",()->configureAlbum());
+        addButton(options,"Apagar álbum e fotografias locais",()->confirmClearAlbum());
         addButton(options,"Apresentação e orientação",()->displaySettings());
         CheckBox auto=new CheckBox(this);auto.setText("Atualizar APK automaticamente (GitHub)");auto.setChecked(preferences.getBoolean("autoUpdate",true));
         auto.setOnCheckedChangeListener((v,checked)->preferences.edit().putBoolean("autoUpdate",checked).apply());options.addView(auto);
@@ -129,17 +118,42 @@ public class MainActivity extends Activity {
     void configureAlbum(){
         EditText input=new EditText(this);input.setSingleLine(false);input.setHint("https://www.icloud.com/sharedalbum/#…");
         if(token!=null)input.setText("https://www.icloud.com/sharedalbum/#"+token);
+        CheckBox clear=new CheckBox(this);clear.setText("Apagar fotografias anteriores ao mudar de álbum");clear.setChecked(true);
+        LinearLayout fields=new LinearLayout(this);fields.setOrientation(LinearLayout.VERTICAL);fields.addView(input);fields.addView(clear);
         AlertDialog dialog=new AlertDialog.Builder(this).setTitle("Álbum público iCloud").setMessage("A ligação é guardada só nesta moldura. Quem tiver essa ligação pode ver as fotografias.")
-            .setView(input).setPositiveButton("Guardar",null).setNegativeButton("Cancelar",null).create();
+            .setView(fields).setPositiveButton("Guardar",null).setNegativeButton("Cancelar",null).create();
         dialog.setOnShowListener(v->dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(button->{
             if(busy){Toast.makeText(this,"Aguarda o fim da sincronização atual.",Toast.LENGTH_LONG).show();return;}
             try{
                 URI uri=new URI(input.getText().toString().trim());String host=uri.getHost();
                 if(!"https".equals(uri.getScheme())||!("www.icloud.com".equals(host)||"icloud.com".equals(host))||!"/sharedalbum/".equals(uri.getPath())||uri.getFragment()==null)throw new IOException();
                 String nextToken=uri.getFragment().split(";")[0];String nextBase=albumBase(nextToken);
+                if(token!=null&&!token.equals(nextToken)&&clear.isChecked())clearAlbumData();
                 token=nextToken;base=nextBase;preferences.edit().putString("albumToken",token).apply();dialog.dismiss();sync();
             }catch(Exception e){input.setError("Usa a ligação Site público de um Álbum partilhado.");}
         }));dialog.show();
+    }
+    void confirmClearAlbum(){
+        new AlertDialog.Builder(this).setTitle("Apagar álbum e fotografias locais?")
+            .setMessage("Remove a ligação e todas as fotografias guardadas nesta moldura. Não altera o álbum no iCloud.")
+            .setPositiveButton("Apagar",(d,w)->{
+                if(busy){Toast.makeText(this,"Aguarda o fim da sincronização atual.",Toast.LENGTH_LONG).show();return;}
+                try{clearAlbumData();}catch(IOException e){Toast.makeText(this,"Não foi possível apagar todos os dados. Tenta novamente.",Toast.LENGTH_LONG).show();}
+            }).setNegativeButton("Cancelar",null).show();
+    }
+    void clearAlbumData()throws IOException{
+        // UI thread only, with no sync in flight. Discard in-memory images immediately.
+        photo.setImageDrawable(null);backdrop.setImageDrawable(null);slides.clear();index=-1;
+        token=null;base=null;boolean cleared=preferences.edit().remove("albumToken").commit();
+        placeholder.setText("Photoframe\nConfigura um álbum no menu (toque prolongado).");placeholder.setVisibility(View.VISIBLE);
+        status="Álbum removido. Configura um álbum para sincronizar.";
+        for(String name:new String[]{"slides.json","slides.tmp"}){
+            File file=new File(getFilesDir(),name);if(file.exists()&&!file.delete())cleared=false;
+        }
+        File[] files=cache.listFiles();
+        if(files==null)cleared=false;
+        else for(File file:files)if(file.isFile()&&!file.delete())cleared=false;
+        if(!cleared)throw new IOException("Cannot clear album data");
     }
     void loadManifest(JSONArray files) throws Exception {
         ArrayList<File> ready=new ArrayList<>();
@@ -235,7 +249,7 @@ public class MainActivity extends Activity {
                 for(File f:cache.listFiles())if(!keep.contains(f.getName()))f.delete();
                 android.util.Log.i("Photoframe","SYNC_OK photos="+manifest.length());
             } catch(Exception e){
-                android.util.Log.w("Photoframe","SYNC_FAILED",e);
+                android.util.Log.w("Photoframe","SYNC_FAILED "+e.getClass().getSimpleName());
                 ui.post(()->{
                     status="Sem atualização: "+e.getClass().getSimpleName()+". A mostrar cópia local; tenta novamente em 1 minuto.";
                     ui.removeCallbacks(poll);if(resumed&&!destroyed)ui.postDelayed(poll,60000);

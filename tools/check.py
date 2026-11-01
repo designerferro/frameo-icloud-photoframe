@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import xml.etree.ElementTree as ET
 
@@ -22,4 +23,5 @@ assert v['author']=='Codex'
 assert not list(root.rglob('.gitignore')),'No .gitignore may be published'
 assert not list(root.rglob('*.p12')) and not list(root.rglob('*.apk')),'Keep signing keys and APK outside source'
 assert not list(root.rglob('*.jpg')) and not (root/'assets/album.json').exists(),'No private album or photos in public source'
+subprocess.run([sys.executable,str(root/'tools/scan_secrets.py')],check=True)
 print('Source and version checks passed.')

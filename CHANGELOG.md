@@ -1,5 +1,13 @@
 # Histórico
 
+## Próxima versão — alterações na fonte
+
+- Preparação de instalação root em pasta exclusiva e privada, com limpeza automática.
+- Ação para apagar álbum e cache; limpeza selecionada por defeito ao mudar de álbum.
+- Removida a importação de álbuns/fotografias embutidos de protótipos antigos.
+- Falhas de sincronização registam apenas o tipo de erro, sem URLs de álbum.
+- Pesquisa de secrets na fonte/histórico e documentação sem registos pessoais de utilização.
+
 ## 1.1.0 — versionCode 2
 
 - APK público sem álbum, fotografias ou credenciais; configuração do álbum na moldura.

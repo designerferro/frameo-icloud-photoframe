@@ -6,7 +6,7 @@ Este texto permite pedir a recriação funcional do projeto. Para refazer esta v
 
 ## Pedido de implementação
 
-Cria uma aplicação Android Java nativa, leve, chamada Photoframe, package `pt.photoframe`, compatível com Android 6/API 23 e sem Google Play Services, AndroidX ou WebView. O alvo inicial é uma Apveelveer AVE-107 Rockchip RK312x, cerca de 1 GB RAM e 1280×800, mas deve funcionar com fotografias e ecrã em orientação horizontal ou vertical.
+Cria uma aplicação Android Java nativa, leve, chamada Photoframe, package `pt.photoframe`, compatível com Android 6/API 23 e sem Google Play Services, AndroidX ou WebView. Uma referência de compatibilidade é a Apveelveer AVE-107 Rockchip RK312x, mas deve funcionar com fotografias e ecrã em orientação horizontal ou vertical.
 
 O APK público deve ser genérico: nunca incluir um álbum pessoal, fotografias de exemplo pessoais, palavras-passe Apple, tokens GitHub ou chaves de assinatura. Pedir no próprio ecrã a ligação Site público de um Álbum partilhado iCloud (`https://www.icloud.com/sharedalbum/#TOKEN`). Guardar a configuração em SharedPreferences privados e validar esquema, host, caminho e formato do token. Explicar que quem possuir essa ligação pode ver as fotografias.
 

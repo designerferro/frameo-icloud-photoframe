@@ -91,9 +91,12 @@ final class AppUpdater {
         String root=runRoot("id",10000);
         if(root.contains("uid=0(")){
             if(manual)say("APK verificado. A instalar com root…");
-            String staged="/data/local/tmp/photoframe-update.apk";
+            // mktemp creates an exclusive root-owned directory; fail closed if unavailable.
+            // Keep both the directory and APK private until pm has opened the verified file.
             String source=verified.getAbsolutePath();
-            String command="cat '"+source+"' > '"+staged+"' && chmod 0644 '"+staged+"' && pm install -r '"+staged+"'";
+            String command="umask 077; stage=$(mktemp -d /data/local/tmp/photoframe.XXXXXXXXXX) || exit 1; "
+                +"trap 'rm -f \"$stage/update.apk\"; rmdir \"$stage\"' EXIT; "
+                +"cat '"+source+"' > \"$stage/update.apk\" && chmod 0600 \"$stage/update.apk\" && pm install -r \"$stage/update.apk\"";
             String result=runRoot(command,120000);
             if(!result.contains("Success"))throw new IOException("Falhou a instalação root; abre o menu para tentar novamente.");
         }else{
