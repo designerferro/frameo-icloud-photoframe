@@ -1,5 +1,13 @@
 # Histórico
 
+## 1.3.1 — versionCode 7
+
+- Gravação de áudio e vídeo intercalados, evitando bloqueios do gravador MP4 no Android 6.
+- Deteção de B-frames antes de gravar diretamente em Android anterior a API 25; conversão para H.264 sem B-frames compatível.
+- Estado de sincronização atualizado ao consultar, descarregar e preparar filmes, sem manter o erro anterior durante uma nova tentativa.
+- Mensagem de falha DNS mais clara, mantendo a repetição após um minuto e a cópia local.
+- Regressão com filmes sintéticos mais longos, áudio como primeira faixa e H.264 com/sem B-frames.
+
 ## 1.3.0 — versionCode 6
 
 - Administração HTTP na LAN, com página incluída no APK e serviço Android em primeiro plano.

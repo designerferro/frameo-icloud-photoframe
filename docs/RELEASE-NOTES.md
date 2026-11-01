@@ -1,14 +1,12 @@
-Photoframe 1.3.0 — acesso remoto e ordem de apresentação (versionCode 6).
+Photoframe 1.3.1 — correção da sincronização com filmes (versionCode 7).
 
 Todo o código foi escrito pelo Codex. Publicação: designerferro.
 
-- Página de configuração na rede interna: http://IP_DA_MOLDURA:8080 (endereço no menu Acesso remoto).
-- Primeiro login admin / admin, com alteração obrigatória do utilizador e palavra-passe antes de configurar.
-- Configurações do menu no navegador: álbum, sincronização, apresentação, orientação, filmes, volume e atualizações. O URL guardado do álbum permanece oculto.
-- Ordem de apresentação: Aleatório ou Por data da fotografia, para fotografias e filmes, persistente e offline.
-- Serviço HTTP independente da janela de apresentação, sessões protegidas, hash de palavra-passe e limites de acesso. HTTP destina-se apenas à LAN de confiança e não cifra o tráfego.
-- Ativação/desativação e recuperação das credenciais no menu local. Sem integração Home Assistant.
+- Corrige bloqueios ao guardar filmes MP4 com áudio no Android 6, que impediam concluir a atualização das fotografias.
+- Intercala as faixas de áudio e vídeo e converte filmes com B-frames para H.264 compatível quando a versão Android não os pode gravar diretamente.
+- Mostra o progresso atual: consulta do álbum, download e preparação do filme. O erro da tentativa anterior deixa de aparecer durante uma nova sincronização.
+- Mensagem de falha temporária de DNS mais clara e repetição ao fim de um minuto.
 
-Sem root, as instalações continuam a exigir confirmação Android na moldura. A opção Definições Android abre esse ecrã na moldura. Mantém a assinatura das releases, o álbum, os filmes e as fotografias existentes. Cache anterior compatível. O APK não inclui álbuns, dados pessoais, credenciais privadas ou chaves de assinatura.
+Preserva o álbum, as fotografias, os filmes e as credenciais remotas. Mantém a assinatura e as funcionalidades da versão anterior.
 
-APK: Photoframe-v1.3.0.apk, update.json e SHA256SUMS.
+APK: Photoframe-v1.3.1.apk, update.json e SHA256SUMS.

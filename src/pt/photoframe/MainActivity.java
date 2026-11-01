@@ -311,7 +311,7 @@ public class MainActivity extends Activity {
     }
     synchronized void sync(){
         if(busy||base==null||destroyed)return;
-        busy=true;
+        busy=true;status="A consultar o álbum iCloud…";
         worker.execute(()->{
             try {
                 JSONObject stream=post(base+"webstream",new JSONObject().put("streamCtag",JSONObject.NULL));
@@ -352,6 +352,7 @@ public class MainActivity extends Activity {
                     if(needed.isEmpty())continue;
                     JSONObject urls=post(base+"webasseturls",new JSONObject().put("photoGuids",ids)).getJSONObject("items");
                     for(JSONObject d:needed){
+                        syncProgress("A descarregar fotografias e filmes…");
                         String sum=d.getString("checksum"); JSONObject asset=urls.getJSONObject(sum);
                         String host=asset.getString("url_location");
                         if(!host.endsWith(".icloud-content.com"))throw new IOException("Unexpected asset host");
@@ -360,6 +361,7 @@ public class MainActivity extends Activity {
                             File source=new File(cache,sum+"-source.tmp"),temp=new File(cache,sum+"-video.tmp");
                             try{
                                 downloadMovie(assetUrl,source);
+                                syncProgress("A preparar um filme (até "+syncSeconds+" segundos)…");
                                 VideoSupport.prepare(MainActivity.this,source,temp,syncSeconds);
                                 if(!temp.renameTo(new File(cache,d.getString("localName"))))throw new IOException("Cannot save video");
                             }catch(Exception e){
@@ -418,12 +420,13 @@ public class MainActivity extends Activity {
             } catch(Exception e){
                 android.util.Log.w("Photoframe","SYNC_FAILED "+e.getClass().getSimpleName());
                 ui.post(()->{
-                    status="Sem atualização: "+e.getClass().getSimpleName()+". A mostrar cópia local; tenta novamente em 1 minuto.";
+                    status=(e instanceof UnknownHostException?"Falha temporária de DNS. Não foi possível localizar o servidor iCloud.":"Sem atualização: "+e.getClass().getSimpleName()+".")+" A mostrar cópia local; tenta novamente em 1 minuto.";
                     ui.removeCallbacks(poll);if(resumed&&!destroyed)ui.postDelayed(poll,60000);
                 });
-            } finally {ui.post(()->busy=false);}
+            } finally {ui.post(()->{busy=false;if(!destroyed)preferences.edit().putString("lastSyncState",status).putLong("lastSyncFinished",System.currentTimeMillis()).apply();});}
         });
     }
+    void syncProgress(String message){ui.post(()->{if(!destroyed){status=message;preferences.edit().putString("lastSyncState",message).apply();}});}
     void downloadMovie(String url,File destination)throws Exception{
         HttpURLConnection c=(HttpURLConnection)new URL(url).openConnection();
         c.setInstanceFollowRedirects(false);c.setConnectTimeout(20000);c.setReadTimeout(30000);
