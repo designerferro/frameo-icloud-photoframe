@@ -7,7 +7,7 @@
 - Validar sincronização, apresentação horizontal/vertical e funcionamento offline num equipamento de teste.
 - Validar mudança de álbum com limpeza das fotografias anteriores e a ação de apagar álbum/cache.
 - Validar atualizações com e sem root, recusa de assinatura diferente e downgrade, e preservação da configuração.
-- Na instalação root, verificar que a preparação usa uma pasta exclusiva e privada, removida após a instalação. Sem mktemp, a instalação deve falhar sem usar um caminho partilhado fixo.
+- Na instalação root, verificar envio do APK privado pela entrada padrão de uma sessão Android, confirmação do commit e abandono em caso de falha. Não expor o APK numa pasta pública.
 
 Não publicar dados do equipamento, número de fotografias, ligações de álbuns ou detalhes pessoais nos resultados.
 
@@ -63,3 +63,8 @@ Resultado do ensaio em Android 6: aprovado. Filmes sintéticos de 12 segundos co
 Diagnóstico num equipamento Android 6: o cálculo PBKDF2 demorou cerca de 18 segundos, ultrapassando os 15 segundos da página anterior. O teste usa dados fictícios e não altera as credenciais.
 
 `node --test tests/remote-api.test.js` verifica login e alteração de credenciais com resposta aos 18,1 segundos, o limite de 120 segundos, a mensagem de recuperação e a manutenção dos 15 segundos nas restantes operações. Estes testes usam um relógio simulado; não constituem um ensaio completo num navegador ligado à moldura. As verificações Java/HTTP, Python, privacidade e assinatura Android 6 passaram.
+
+
+## Instalação root na versão 1.3.3
+
+Falha anterior reproduzida em Android 6: `pm install -r` devolve `INSTALL_FAILED_INVALID_URI` para a cópia numa pasta root privada. O envio por sessão Android instalou a 1.3.2 e preservou as preferências, incluindo credenciais. `RootInstallerTest` verifica envio integral, nomes com aspas e falhas em create/write/commit mesmo quando pm devolve código zero; sessões falhadas são abandonadas.

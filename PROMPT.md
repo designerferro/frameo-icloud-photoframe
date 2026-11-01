@@ -48,3 +48,7 @@ Intercalar os dados de áudio e vídeo ao escrever MP4, tanto na cópia direta c
 ## Versão 1.3.2 — espera de autenticação HTTP
 
 Permitir até 120 segundos para login e alteração de credenciais em hardware lento, com mensagem de processamento e botão desativado. Manter 15 segundos nas restantes operações e preservar o PBKDF2 existente. Caso o pedido expire, informar que as novas credenciais podem já estar guardadas.
+
+## Versão 1.3.3 — instalação root por sessão
+
+Enviar o APK privado e verificado com pm install-create -r, install-write pela entrada padrão e install-commit. Confirmar a resposta final, abandonar sessões falhadas e nunca expor o ficheiro a outros utilizadores. Preservar dados, assinatura, limites e credenciais.

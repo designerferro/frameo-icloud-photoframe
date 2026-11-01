@@ -1,5 +1,12 @@
 # Histórico
 
+## 1.3.3 — versionCode 9
+
+- Instalação root por sessão Android, enviando o APK privado pela entrada padrão e evitando `INSTALL_FAILED_INVALID_URI`.
+- Confirmação de sucesso apenas após concluir a sessão; abandono das sessões em caso de erro.
+- Pedidos repetidos deixam de substituir o estado da atualização por uma mensagem de ocupação.
+- Após substituição do APK, o estado confirma a instalação concluída.
+
 ## 1.3.2 — versionCode 8
 
 - Espera de até dois minutos para iniciar sessão e alterar credenciais HTTP em molduras mais lentas.

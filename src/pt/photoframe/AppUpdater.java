@@ -31,12 +31,13 @@ final class AppUpdater {
     }
     String installedLabel(){return installed.versionName+" ("+installed.versionCode+")";}
     String latestLabel(){return prefs.getString("latestRelease","ainda não consultada");}
-    void say(String message){prefs.edit().putString("updateStatus",message).apply();ui.post(()->{if(!activity.destroyed)Toast.makeText(activity,message,Toast.LENGTH_LONG).show();});}
+    void notifyUser(String message){ui.post(()->{if(!activity.destroyed)Toast.makeText(activity,message,Toast.LENGTH_LONG).show();});}
+    void say(String message){prefs.edit().putString("updateStatus",message).apply();notifyUser(message);}
     void check(boolean manual){check(manual,false);}
     void checkRemote(boolean reinstall){check(true,reinstall);}
     private void check(boolean manual,boolean remoteReinstall){
         if(!manual&&System.currentTimeMillis()-prefs.getLong("lastApkCheck",0)<21600000)return;
-        if(!running.compareAndSet(false,true)){if(manual)say("Já está a verificar uma atualização.");return;}
+        if(!running.compareAndSet(false,true)){if(manual)notifyUser("Já existe uma verificação ou instalação em curso. Aguarda a conclusão.");return;}
         if(manual)say("A consultar a última release no GitHub…");
         worker.execute(()->{
             try{
@@ -75,7 +76,7 @@ final class AppUpdater {
         });
     }
     private void downloadAndInstall(String url,String hash,int code,String name){
-        if(!running.compareAndSet(false,true)){say("Já está a atualizar.");return;}
+        if(!running.compareAndSet(false,true)){notifyUser("Já existe uma atualização em curso. Aguarda a conclusão.");return;}
         worker.execute(()->{try{prepareAndInstall(url,hash,code,name,true);}catch(Exception e){say("Atualização recusada: "+e.getMessage());}finally{running.set(false);}});
     }
     private void prepareAndInstall(String url,String checksum,int code,String name,boolean manual)throws Exception{
@@ -90,18 +91,15 @@ final class AppUpdater {
         if(!sameSignatures(installed.signatures,candidate.signatures))throw new IOException("Assinatura diferente. Só a mesma chave pode atualizar esta instalação.");
         File verified=new File(activity.getFilesDir(),"verified-update.apk");
         if(!temp.renameTo(verified))throw new IOException("Não foi possível preparar o APK");
-        // Stage root installation using fixed private paths. pm install -r also enforces signature continuity.
+        // Package Installer sessions accept stdin without exposing the private APK path.
         String root=runRoot("id",10000);
         if(root.contains("uid=0(")){
             if(manual)say("APK verificado. A instalar com root…");
-            // mktemp creates an exclusive root-owned directory; fail closed if unavailable.
-            // Keep both the directory and APK private until pm has opened the verified file.
-            String source=verified.getAbsolutePath();
-            String command="umask 077; stage=$(mktemp -d /data/local/tmp/photoframe.XXXXXXXXXX) || exit 1; "
-                +"trap 'rm -f \"$stage/update.apk\"; rmdir \"$stage\"' EXIT; "
-                +"cat '"+source+"' > \"$stage/update.apk\" && chmod 0600 \"$stage/update.apk\" && pm install -r \"$stage/update.apk\"";
-            String result=runRoot(command,120000);
-            if(!result.contains("Success"))throw new IOException("Falhou a instalação root; abre o menu para tentar novamente.");
+            String result=runRoot(RootInstaller.command(verified.getAbsolutePath(),verified.length()),120000);
+            if(!result.trim().equals(RootInstaller.SUCCESS)){
+                String reason=result.contains("PHOTOFRAME_INSTALL_CREATE_FAILED")?"criar a sessão":result.contains("PHOTOFRAME_INSTALL_WRITE_FAILED")?"enviar o APK":result.contains("PHOTOFRAME_INSTALL_COMMIT_FAILED")?"concluir a instalação":"comunicar com o instalador";
+                throw new IOException("Falhou a instalação root ao "+reason+". Os dados foram mantidos.");
+            }
         }else{
             ui.post(()->{
                 if(activity.destroyed)return;
@@ -122,7 +120,7 @@ final class AppUpdater {
     private static String runRoot(String command,long timeout){
         java.lang.Process p=null;
         try{
-            p=Runtime.getRuntime().exec(new String[]{"su","-c",command});
+            p=new ProcessBuilder("su","-c",command).redirectErrorStream(true).start();
             long until=SystemClock.elapsedRealtime()+timeout;
             while(true){try{p.exitValue();break;}catch(IllegalThreadStateException e){if(SystemClock.elapsedRealtime()>until){p.destroy();return "";}Thread.sleep(100);}}
             return new String(MainActivity.read(p.getInputStream(),65536),"UTF-8");
