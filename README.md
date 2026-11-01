@@ -8,7 +8,7 @@ Aplicação Android nativa, leve, para apresentar fotografias e filmes de um **�
 
 O APK das Releases é genérico: **não contém fotografias, ligação a um álbum, credenciais Apple, token GitHub nem chave privada**. A ligação é introduzida na moldura e guardada no espaço privado da aplicação.
 
-A versão **1.2.1** protege a ligação guardada do álbum nos ecrãs de configuração e corrige as instruções do `.gitignore` local. Mantém filmes, adaptação de resolução, duração e volume configuráveis.
+A versão **1.3.0** acrescenta acesso remoto pelo navegador na rede interna e ordem de apresentação aleatória ou por data, para fotografias e filmes. Mantém a ligação guardada do álbum oculta.
 
 ## Fotografias e apresentação
 
@@ -22,6 +22,32 @@ A versão **1.2.1** protege a ligação guardada do álbum nos ecrãs de configu
 - Arranque via BOOT_COMPLETED e suporte como aplicação HOME no Android 6.
 
 A configuração indica apenas se existe um álbum guardado. Nunca mostra a ligação atual: para a substituir, introduzir uma nova ligação num campo vazio e mascarado. Guardar o campo vazio conserva o álbum existente.
+
+## Acesso remoto na rede interna
+
+1. Na moldura, abrir **Acesso remoto** no menu e consultar o endereço `http://IP_DA_MOLDURA:8080`.
+2. Abrir esse endereço num navegador na mesma rede. O serviço fica ativo por omissão; pode ser desligado na moldura ou na página.
+3. No primeiro acesso, usar **admin / admin**. Antes de permitir qualquer configuração, a página obriga a escolher um novo utilizador diferente de `admin` (3–48 caracteres A–Z, a–z, 0–9, ponto, hífen ou sublinhado) e uma nova palavra-passe de 8–128 caracteres.
+4. Iniciar sessão com as novas credenciais. A página permite substituir/apagar o álbum, sincronizar, avançar a apresentação, escolher modo/orientação/ordem, definir duração e volume, controlar atualizações automáticas, procurar ou forçar uma atualização do APK e alterar as credenciais.
+
+O botão **Definições Android** abre as definições no ecrã da moldura; não disponibiliza um painel Android completo no navegador. Sem root, a instalação de um APK continua a precisar da confirmação Android local. A página pede confirmação antes de apagar o álbum ou forçar uma reinstalação.
+
+A ligação atual do álbum nunca é devolvida em HTML/JSON; o campo remoto é vazio e mascarado e serve apenas para a substituir. Guardar vazio mantém o álbum. A página não disponibiliza as fotografias nem os ficheiros privados.
+
+O servidor usa um serviço Android em primeiro plano, com notificação, e continua acessível quando se abrem as definições Android. Se a atividade tiver sido fechada, uma operação remota tenta reabrir a apresentação. As sessões expiram após oito horas e terminam após reinício, mudança ou reposição de credenciais. As palavras-passe são guardadas como hash PBKDF2 com salt; existem limites de tentativas, pedidos e ligações, proteção CSRF/Origin e validação do endereço de acesso.
+
+**HTTP não cifra o tráfego.** Usar apenas numa rede interna de confiança; não encaminhar a porta para a Internet. O endereço IP pode mudar com o Wi-Fi/DHCP. Redes de convidados ou com isolamento entre clientes podem impedir o acesso. Esta versão não inclui integração Home Assistant.
+
+Se perderes as credenciais, usar **Acesso remoto → Repor credenciais remotas** na própria moldura: volta a `admin / admin`, termina as sessões e obriga novamente à alteração no primeiro acesso, preservando o álbum. Se desativares o acesso remoto, a reativação é feita no menu local.
+
+## Ordem de apresentação
+
+No menu da moldura e na página remota, **Ordem de apresentação** oferece:
+
+- **Aleatório**: baralha os itens em cada volta ao álbum e evita repetir imediatamente o último item na passagem para a volta seguinte.
+- **Por data da fotografia** (por omissão): apresenta do mais antigo para o mais recente, usando a data fornecida pelo álbum iCloud, incluindo filmes. A conversão e o download não alteram essa data.
+
+A escolha é guardada e aplica-se também à cópia offline. Uma sincronização sem alterações ao álbum conserva a sequência aleatória em curso. A cache das versões anteriores é compatível.
 
 ## Filmes: duração, resolução e som
 
@@ -51,7 +77,7 @@ Não é necessário compilar para usar a aplicação. Descarregar o APK em [Rele
 
 ```text
 adb devices -l
-adb install Photoframe-v1.2.1.apk
+adb install Photoframe-v1.3.0.apk
 adb shell am start -n pt.photoframe/.MainActivity
 ```
 
@@ -114,11 +140,11 @@ As versões são comparadas pelo inteiro **versionCode**. `versionName` e tag s�
 
 ```json
 {
-  "versionName": "1.2.1",
-  "versionCode": 5,
+  "versionName": "1.3.0",
+  "versionCode": 6,
   "repository": "designerferro/frameo-icloud-photoframe",
   "author": "Codex",
-  "apk": "Photoframe-v1.2.1.apk",
+  "apk": "Photoframe-v1.3.0.apk",
   "sha256": "DIGEST_SHA256_GERADO_A_PARTIR_DO_APK",
   "minSdk": 23
 }

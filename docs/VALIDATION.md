@@ -36,3 +36,14 @@ Resultado do ensaio de 1.2.0 em Android 6: aprovado. Saídas sintéticas de 640�
 Com um álbum de teste configurado, executar o mesmo auxiliar com `--privacy-only` para verificar o diálogo real: campo inicialmente vazio, entrada mascarada, ausência do token guardado nos textos, ligação inválida recusada e gravação vazia sem alterar álbum nem fotografias. Este ensaio não reproduz som e não imprime a ligação guardada.
 
 O `.gitignore` pode existir localmente, deve incluir a entrada `.gitignore` e não pode estar no índice Git. As verificações correm tanto no ambiente local com este ficheiro ignorado como no GitHub sem o ficheiro.
+
+
+## Acesso remoto e ordem na versão 1.3.0
+
+`tools/check.py` executa também `RemoteCoreTest`: password/salt PBKDF2, tokens, invalidação das credenciais iniciais e limites do parser HTTP (corpos grandes, cabeçalhos duplicados, codificação ambígua, parâmetros em URL e proteções do navegador).
+
+Com uma moldura de teste com álbum configurado, executar o auxiliar `tools/device_video_test.py` com os mesmos argumentos de compilação e a opção `--remote-only`. O ensaio Android verifica: login anónimo/errado, obrigação de trocar credenciais, invalidação de sessões, recusa de CSRF/Origin, ausência do URL/token guardado nas respostas, gravação de configurações, ordem aleatória sem repetição na volta, transição entre voltas, datas ascendentes, cache antiga, limites de volume, confirmação de remoção, logout e disponibilidade com as definições Android abertas. Usa credenciais temporárias e repõe as anteriores no fim, sem apagar o álbum.
+
+Verificar também a página real num navegador na LAN, a persistência após reinício e a desativação/reativação local. As restrições de arranque de versões Android mais recentes e do fabricante continuam a aplicar-se; o alvo principal é Android 6.
+
+Resultado em Android 6: ensaio remoto aprovado, incluindo autenticação, privacidade, configurações e ordem. Após reinício, serviço em primeiro plano e página/recursos acessíveis pela LAN; a consulta sem sessão das configurações foi recusada. O DHCP pode atribuir um endereço diferente após reiniciar, pelo que o menu deve ser consultado novamente.

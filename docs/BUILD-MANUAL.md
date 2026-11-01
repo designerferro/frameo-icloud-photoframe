@@ -2,7 +2,7 @@
 
 Este procedimento usa os mesmos ficheiros do projeto. Requer JDK 17 no PATH, Python 3 e os arquivos Android organizados como descrito no README. Todos os diretórios de saída/chaves ficam fora do código.
 
-Versão desta fonte: `1.2.1`, versionCode `5`. Para uma versão futura, atualizar primeiro `VERSION.json` e `AndroidManifest.xml` e adaptar o nome final. As bibliotecas Android 23 contêm as APIs de compilação; os executáveis Android devem ser os próprios do sistema do computador.
+Versão desta fonte: `1.3.0`, versionCode `6`. Para uma versão futura, atualizar primeiro `VERSION.json` e `AndroidManifest.xml` e adaptar o nome final. As bibliotecas Android 23 contêm as APIs de compilação; os executáveis Android devem ser os próprios do sistema do computador.
 
 ## Variáveis e pastas
 
@@ -56,7 +56,7 @@ java -cp "$PhotoBt\lib\d8.jar" com.android.tools.r8.D8 --lib "$PhotoJar" --min-a
 GNU/Linux/macOS:
 
 ```sh
-"$PhotoBt/aapt" package -f -M AndroidManifest.xml -I "$PhotoJar" -F "$PhotoOut/unsigned.apk"
+"$PhotoBt/aapt" package -f -A assets -M AndroidManifest.xml -I "$PhotoJar" -F "$PhotoOut/unsigned.apk"
 python3 -c "import sys,zipfile; z=zipfile.ZipFile(sys.argv[1],'a'); z.write(sys.argv[2],'classes.dex'); z.close()" "$PhotoOut/unsigned.apk" "$PhotoOut/classes.dex"
 "$PhotoBt/zipalign" -f 4 "$PhotoOut/unsigned.apk" "$PhotoOut/aligned.apk"
 ```
@@ -64,7 +64,7 @@ python3 -c "import sys,zipfile; z=zipfile.ZipFile(sys.argv[1],'a'); z.write(sys.
 Windows PowerShell:
 
 ```powershell
-& "$PhotoBt\aapt.exe" package -f -M AndroidManifest.xml -I "$PhotoJar" -F "$PhotoOut\unsigned.apk"
+& "$PhotoBt\aapt.exe" package -f -A assets -M AndroidManifest.xml -I "$PhotoJar" -F "$PhotoOut\unsigned.apk"
 py -3 -c "import sys,zipfile; z=zipfile.ZipFile(sys.argv[1],'a'); z.write(sys.argv[2],'classes.dex'); z.close()" "$PhotoOut\unsigned.apk" "$PhotoOut\classes.dex"
 & "$PhotoBt\zipalign.exe" -f 4 "$PhotoOut\unsigned.apk" "$PhotoOut\aligned.apk"
 ```
@@ -79,16 +79,16 @@ GNU/Linux/macOS:
 
 ```sh
 keytool -genkeypair -keystore "$PhotoOut/photoframe-signing.p12" -alias photoframe -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Codex Photoframe local build"
-java -jar "$PhotoBt/lib/apksigner.jar" sign --ks "$PhotoOut/photoframe-signing.p12" --ks-key-alias photoframe --out "$PhotoOut/Photoframe-v1.2.1.apk" "$PhotoOut/aligned.apk"
-java -jar "$PhotoBt/lib/apksigner.jar" verify --verbose --print-certs "$PhotoOut/Photoframe-v1.2.1.apk"
+java -jar "$PhotoBt/lib/apksigner.jar" sign --ks "$PhotoOut/photoframe-signing.p12" --ks-key-alias photoframe --out "$PhotoOut/Photoframe-v1.3.0.apk" "$PhotoOut/aligned.apk"
+java -jar "$PhotoBt/lib/apksigner.jar" verify --verbose --print-certs "$PhotoOut/Photoframe-v1.3.0.apk"
 ```
 
 Windows PowerShell:
 
 ```powershell
 keytool -genkeypair -keystore "$PhotoOut\photoframe-signing.p12" -alias photoframe -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Codex Photoframe local build"
-java -jar "$PhotoBt\lib\apksigner.jar" sign --ks "$PhotoOut\photoframe-signing.p12" --ks-key-alias photoframe --out "$PhotoOut\Photoframe-v1.2.1.apk" "$PhotoOut\aligned.apk"
-java -jar "$PhotoBt\lib\apksigner.jar" verify --verbose --print-certs "$PhotoOut\Photoframe-v1.2.1.apk"
+java -jar "$PhotoBt\lib\apksigner.jar" sign --ks "$PhotoOut\photoframe-signing.p12" --ks-key-alias photoframe --out "$PhotoOut\Photoframe-v1.3.0.apk" "$PhotoOut\aligned.apk"
+java -jar "$PhotoBt\lib\apksigner.jar" verify --verbose --print-certs "$PhotoOut\Photoframe-v1.3.0.apk"
 ```
 
 Se a chave já existe, saltar **apenas** o comando `keytool -genkeypair`. Não gerar outra chave para uma atualização.

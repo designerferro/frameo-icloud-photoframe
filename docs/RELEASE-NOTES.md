@@ -1,12 +1,14 @@
-Photoframe 1.2.1 — privacidade da ligação do álbum (versionCode 5).
+Photoframe 1.3.0 — acesso remoto e ordem de apresentação (versionCode 6).
 
 Todo o código foi escrito pelo Codex. Publicação: designerferro.
 
-- A configuração mostra apenas se existe um álbum guardado, sem revelar o respetivo URL ou token.
-- O campo para substituir a ligação começa vazio, com entrada mascarada e sem opção de revelar. Guardar vazio mantém o álbum e a cache existentes.
-- Corrigida a instrução de desenvolvimento: criar `.gitignore` local que inclui `.gitignore`, sem o publicar no GitHub.
-- Prompt com o utilizador GitHub indicado uma única vez e restantes referências adaptáveis.
+- Página de configuração na rede interna: http://IP_DA_MOLDURA:8080 (endereço no menu Acesso remoto).
+- Primeiro login admin / admin, com alteração obrigatória do utilizador e palavra-passe antes de configurar.
+- Configurações do menu no navegador: álbum, sincronização, apresentação, orientação, filmes, volume e atualizações. O URL guardado do álbum permanece oculto.
+- Ordem de apresentação: Aleatório ou Por data da fotografia, para fotografias e filmes, persistente e offline.
+- Serviço HTTP independente da janela de apresentação, sessões protegidas, hash de palavra-passe e limites de acesso. HTTP destina-se apenas à LAN de confiança e não cifra o tráfego.
+- Ativação/desativação e recuperação das credenciais no menu local. Sem integração Home Assistant.
 
-Mantém vídeos, duração e volume da versão anterior, a assinatura das releases e os dados existentes. O APK continua genérico, sem álbuns, credenciais ou chaves privadas.
+Sem root, as instalações continuam a exigir confirmação Android na moldura. A opção Definições Android abre esse ecrã na moldura. Mantém a assinatura das releases, o álbum, os filmes e as fotografias existentes. Cache anterior compatível. O APK não inclui álbuns, dados pessoais, credenciais privadas ou chaves de assinatura.
 
-APK: Photoframe-v1.2.1.apk, update.json e SHA256SUMS.
+APK: Photoframe-v1.3.0.apk, update.json e SHA256SUMS.

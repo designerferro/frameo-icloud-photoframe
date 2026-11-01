@@ -1,5 +1,15 @@
 # Histórico
 
+## 1.3.0 — versionCode 6
+
+- Administração HTTP na LAN, com página incluída no APK e serviço Android em primeiro plano.
+- Login inicial admin / admin; alteração obrigatória do utilizador e palavra-passe antes de configurar.
+- Sessões, hash PBKDF2, limites de tentativas/pedidos e proteção de origem/CSRF.
+- Configurações e ações do menu disponíveis no navegador; URL guardado do álbum nunca devolvido.
+- Ordem Aleatório ou Por data da fotografia, para fotografias e filmes, também offline.
+- Datas guardadas no manifesto, migração da cache anterior e preservação da sequência em sincronizações sem alterações.
+- Sem integração Home Assistant.
+
 ## 1.2.1 — versionCode 5
 
 - A configuração nunca preenche o campo com o URL/token guardado do álbum.
