@@ -20,7 +20,12 @@ v=json.loads((root/'VERSION.json').read_text(encoding='utf-8'))
 m=ET.parse(root/'AndroidManifest.xml').getroot();a='{http://schemas.android.com/apk/res/android}'
 assert m.get(a+'versionName')==v['versionName'] and int(m.get(a+'versionCode'))==v['versionCode']
 assert v['author']=='Codex'
-assert not list(root.rglob('.gitignore')),'No .gitignore may be published'
+tracked=subprocess.check_output(['git','-C',str(root),'ls-files','-z']).decode().split('\0')
+assert not any(Path(name).name=='.gitignore' for name in tracked if name),'Do not track or publish .gitignore'
+local_ignore=root/'.gitignore'
+if local_ignore.exists():
+    assert '.gitignore' in local_ignore.read_text(encoding='utf-8').splitlines(),'Local .gitignore must ignore itself'
+    assert subprocess.run(['git','-C',str(root),'check-ignore','-q','.gitignore']).returncode==0,'Local .gitignore must be ignored'
 assert not list(root.rglob('*.p12')) and not list(root.rglob('*.apk')),'Keep signing keys and APK outside source'
 assert not list(root.rglob('*.jpg')) and not (root/'assets/album.json').exists(),'No private album or photos in public source'
 subprocess.run([sys.executable,str(root/'tools/scan_secrets.py')],check=True)

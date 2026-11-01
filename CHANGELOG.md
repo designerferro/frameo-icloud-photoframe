@@ -1,5 +1,12 @@
 # Histórico
 
+## 1.2.1 — versionCode 5
+
+- A configuração nunca preenche o campo com o URL/token guardado do álbum.
+- Nova ligação introduzida em campo vazio e mascarado; guardar vazio mantém o álbum existente.
+- `.gitignore` local que ignora a si próprio, sem o publicar; verificações adaptadas.
+- Prompt com o utilizador GitHub definido uma só vez e restantes referências parametrizadas.
+
 ## 1.2.0 — versionCode 4
 
 - Fotografias e filmes na mesma apresentação offline.

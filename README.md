@@ -8,7 +8,7 @@ Aplicação Android nativa, leve, para apresentar fotografias e filmes de um **�
 
 O APK das Releases é genérico: **não contém fotografias, ligação a um álbum, credenciais Apple, token GitHub nem chave privada**. A ligação é introduzida na moldura e guardada no espaço privado da aplicação.
 
-A versão **1.2.0** acrescenta filmes, adaptação local da resolução, limite de duração configurável e volume de 0 a 10.
+A versão **1.2.1** protege a ligação guardada do álbum nos ecrãs de configuração e corrige as instruções do `.gitignore` local. Mantém filmes, adaptação de resolução, duração e volume configuráveis.
 
 ## Fotografias e apresentação
 
@@ -20,6 +20,8 @@ A versão **1.2.0** acrescenta filmes, adaptação local da resolução, limite 
 - Sem barras pretas acrescentadas pelo layout: fotografia inteira sobre fundo suave da própria imagem, ou preenchimento com recorte. O primeiro plano mantém a proporção.
 - Orientação automática, horizontal ou vertical. A opção manual é útil em molduras sem sensor de rotação.
 - Arranque via BOOT_COMPLETED e suporte como aplicação HOME no Android 6.
+
+A configuração indica apenas se existe um álbum guardado. Nunca mostra a ligação atual: para a substituir, introduzir uma nova ligação num campo vazio e mascarado. Guardar o campo vazio conserva o álbum existente.
 
 ## Filmes: duração, resolução e som
 
@@ -49,7 +51,7 @@ Não é necessário compilar para usar a aplicação. Descarregar o APK em [Rele
 
 ```text
 adb devices -l
-adb install Photoframe-v1.2.0.apk
+adb install Photoframe-v1.2.1.apk
 adb shell am start -n pt.photoframe/.MainActivity
 ```
 
@@ -112,11 +114,11 @@ As versões são comparadas pelo inteiro **versionCode**. `versionName` e tag s�
 
 ```json
 {
-  "versionName": "1.2.0",
-  "versionCode": 4,
+  "versionName": "1.2.1",
+  "versionCode": 5,
   "repository": "designerferro/frameo-icloud-photoframe",
   "author": "Codex",
-  "apk": "Photoframe-v1.2.0.apk",
+  "apk": "Photoframe-v1.2.1.apk",
   "sha256": "DIGEST_SHA256_GERADO_A_PARTIR_DO_APK",
   "minSdk": 23
 }
@@ -187,7 +189,7 @@ PY tools/release.py --out "PASTA_DA_COMPILACAO"
 
 Ou fazer a operação manualmente em GitHub → Releases → Draft a new release, escolher a tag/commit e anexar apenas os três ficheiros públicos. Publicar como release estável para aparecer em `/releases/latest`. A chave privada nunca é enviada por esse script.
 
-Não existe `.gitignore`, por pedido do responsável pelo projeto. SDK, chaves e diretórios de saída devem ficar fora deste repositório. O [prompt](PROMPT.md) descreve as funcionalidades e o contexto de recriação.
+Existe um `.gitignore` apenas local, que inclui a entrada `.gitignore` para se excluir a si próprio. Não é versionado nem publicado no GitHub. SDK, chaves e diretórios de saída devem ficar fora deste repositório. O [prompt](PROMPT.md) descreve as funcionalidades e o contexto de recriação.
 
 ## Limitações
 

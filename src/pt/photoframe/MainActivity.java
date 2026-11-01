@@ -175,13 +175,17 @@ public class MainActivity extends Activity {
         return String.format(Locale.US,"https://p%02d-sharedstreams.icloud.com/%s/sharedstreams/",p,token);
     }
     void configureAlbum(){
-        EditText input=new EditText(this);input.setSingleLine(false);input.setHint("https://www.icloud.com/sharedalbum/#…");
-        if(token!=null)input.setText("https://www.icloud.com/sharedalbum/#"+token);
+        EditText input=new EditText(this);input.setSingleLine(true);
+        input.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        input.setTransformationMethod(android.text.method.PasswordTransformationMethod.getInstance());
+        input.setHint(token==null?"Introduzir ligação do álbum":"Nova ligação (vazio mantém o álbum)");
+        // Never populate the editor with the saved URL or token, even masked.
         CheckBox clear=new CheckBox(this);clear.setText("Apagar fotografias e filmes anteriores ao mudar de álbum");clear.setChecked(true);
         LinearLayout fields=new LinearLayout(this);fields.setOrientation(LinearLayout.VERTICAL);fields.addView(input);fields.addView(clear);
-        AlertDialog dialog=new AlertDialog.Builder(this).setTitle("Álbum público iCloud").setMessage("A ligação é guardada só nesta moldura. Quem tiver essa ligação pode ver as fotografias.")
+        AlertDialog dialog=new AlertDialog.Builder(this).setTitle("Álbum público iCloud").setMessage((token==null?"Nenhum álbum configurado.":"Álbum configurado. A ligação guardada não é apresentada.")+" A nova ligação fica guardada só nesta moldura. Quem a tiver pode ver as fotografias.")
             .setView(fields).setPositiveButton("Guardar",null).setNegativeButton("Cancelar",null).create();
         dialog.setOnShowListener(v->dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(button->{
+            if(input.getText().toString().trim().isEmpty()&&token!=null){dialog.dismiss();return;}
             if(busy){Toast.makeText(this,"Aguarda o fim da sincronização atual.",Toast.LENGTH_LONG).show();return;}
             try{
                 URI uri=new URI(input.getText().toString().trim());String host=uri.getHost();

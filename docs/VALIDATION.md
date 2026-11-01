@@ -29,3 +29,10 @@ PY tools/device_video_test.py --sdk CAMINHO_SDK --jdk CAMINHO_JDK --keystore CAM
 O teste temporário é compilado e assinado localmente; não integra o APK de distribuição. A integração com o iCloud continua a depender dos endpoints do álbum público e dos formatos fornecidos pelo serviço. Os testes sintéticos não demonstram suporte a todos os vídeos iCloud.
 
 Resultado do ensaio de 1.2.0 em Android 6: aprovado. Saídas sintéticas de 640×360, 1280×720 e 400×720 (vertical), com áudio AAC e corte de duração; reprodução, avanço automático, volumes 0/10 e libertação ao pausar aprovados.
+
+
+## Privacidade da configuração na versão 1.2.1
+
+Com um álbum de teste configurado, executar o mesmo auxiliar com `--privacy-only` para verificar o diálogo real: campo inicialmente vazio, entrada mascarada, ausência do token guardado nos textos, ligação inválida recusada e gravação vazia sem alterar álbum nem fotografias. Este ensaio não reproduz som e não imprime a ligação guardada.
+
+O `.gitignore` pode existir localmente, deve incluir a entrada `.gitignore` e não pode estar no índice Git. As verificações correm tanto no ambiente local com este ficheiro ignorado como no GitHub sem o ficheiro.
