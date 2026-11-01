@@ -47,3 +47,12 @@ Com uma moldura de teste com álbum configurado, executar o auxiliar `tools/devi
 Verificar também a página real num navegador na LAN, a persistência após reinício e a desativação/reativação local. As restrições de arranque de versões Android mais recentes e do fabricante continuam a aplicar-se; o alvo principal é Android 6.
 
 Resultado em Android 6: ensaio remoto aprovado, incluindo autenticação, privacidade, configurações e ordem. Após reinício, serviço em primeiro plano e página/recursos acessíveis pela LAN; a consulta sem sessão das configurações foi recusada. O DHCP pode atribuir um endereço diferente após reiniciar, pelo que o menu deve ser consultado novamente.
+
+
+## Sincronização com filmes na versão 1.3.1
+
+O ensaio de vídeo inclui agora dois filmes sintéticos de 12 segundos, com o áudio como primeira faixa: um H.264 com B-frames e outro Baseline sem B-frames. A duração pedida é de 30 segundos, de modo a processar o filme completo, além dos casos anteriores com corte de 2 segundos e conversão horizontal/vertical. Ambos devem terminar com áudio e duração entre 10 e 13 segundos, sem bloquear o gravador MP4.
+
+A documentação Android só garante gravação de B-frames em MP4 a partir de API 25. Em versões anteriores, a aplicação examina os timestamps antes da cópia direta e recodifica quando necessário. Referência: [MediaMuxer](https://developer.android.com/reference/android/media/MediaMuxer).
+
+Resultado do ensaio em Android 6: aprovado. Filmes sintéticos de 12 segundos com e sem B-frames terminam com áudio, além dos casos de corte, redimensionamento e rotação. Reprodução/avanço/volume aprovados. Sincronização real concluída após a correção sem bloquear na preparação do filme. Dados e credenciais preservados.

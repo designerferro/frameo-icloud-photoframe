@@ -8,7 +8,7 @@ Aplicação Android nativa, leve, para apresentar fotografias e filmes de um **�
 
 O APK das Releases é genérico: **não contém fotografias, ligação a um álbum, credenciais Apple, token GitHub nem chave privada**. A ligação é introduzida na moldura e guardada no espaço privado da aplicação.
 
-A versão **1.3.0** acrescenta acesso remoto pelo navegador na rede interna e ordem de apresentação aleatória ou por data, para fotografias e filmes. Mantém a ligação guardada do álbum oculta.
+A versão **1.3.1** corrige bloqueios na preparação de filmes com áudio no Android 6 e mostra o progresso real da sincronização. Mantém acesso remoto, ordem aleatória/por data e a ligação guardada do álbum oculta.
 
 ## Fotografias e apresentação
 
@@ -57,7 +57,7 @@ No menu **Filmes: duração e volume**:
 - O máximo permitido é calculado na própria moldura a partir do espaço livre: reserva 128 MB e destina até um quarto do restante a um filme, com uma estimativa de 2 Mbit/s de vídeo + 192 kbit/s de áudio. Aplica também o limite de duração em milissegundos do Android. Este valor é uma estimativa conservadora de armazenamento, não uma garantia de desempenho do equipamento.
 - Volume: **0 = sem som; 10 = máximo**. Por omissão fica sem som. O nível é guardado e aplicado ao som multimédia da moldura.
 
-Os filmes são descarregados diretamente do álbum e preparados na moldura, antes de entrar na apresentação. H.264 que já cabe no ecrã é guardado em MP4 sem recodificar; os restantes vídeos que o Android consiga descodificar são convertidos para H.264 na resolução do ecrã ou inferior, preservando a proporção. A conversão usa o codificador Android e pode demorar aproximadamente o tempo do excerto. Não exige computador nem envia filmes para serviços de conversão.
+Os filmes são descarregados diretamente do álbum e preparados na moldura, antes de entrar na apresentação. H.264 que já cabe no ecrã é guardado em MP4 sem recodificar quando o formato é suportado pela versão Android; no Android 6, filmes com B-frames são recodificados para um perfil compatível; os restantes vídeos que o Android consiga descodificar são convertidos para H.264 na resolução do ecrã ou inferior, preservando a proporção. A conversão usa o codificador Android e pode demorar aproximadamente o tempo do excerto. Não exige computador nem envia filmes para serviços de conversão.
 
 O áudio AAC é conservado. Formatos de som incompatíveis ou vídeos que o equipamento não consiga converter são ignorados, com indicação no estado da sincronização. Não é garantido suporte universal a todos os formatos/qualidades do iCloud. Os downloads são feitos para ficheiro, com limite de espaço, sem carregar o filme inteiro na memória. A cache permite reprodução sem internet. Alterar a duração pode exigir novo download; o álbum original permanece intacto.
 
@@ -77,7 +77,7 @@ Não é necessário compilar para usar a aplicação. Descarregar o APK em [Rele
 
 ```text
 adb devices -l
-adb install Photoframe-v1.3.0.apk
+adb install Photoframe-v1.3.1.apk
 adb shell am start -n pt.photoframe/.MainActivity
 ```
 
@@ -140,11 +140,11 @@ As versões são comparadas pelo inteiro **versionCode**. `versionName` e tag s�
 
 ```json
 {
-  "versionName": "1.3.0",
-  "versionCode": 6,
+  "versionName": "1.3.1",
+  "versionCode": 7,
   "repository": "designerferro/frameo-icloud-photoframe",
   "author": "Codex",
-  "apk": "Photoframe-v1.3.0.apk",
+  "apk": "Photoframe-v1.3.1.apk",
   "sha256": "DIGEST_SHA256_GERADO_A_PARTIR_DO_APK",
   "minSdk": 23
 }

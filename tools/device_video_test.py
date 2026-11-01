@@ -31,19 +31,19 @@ with tempfile.TemporaryDirectory(prefix='photoframe-video-') as temporary:
     (source/'AndroidManifest.xml').write_text(('''<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="pt.photoframe.videotest" android:versionCode="1" android:versionName="test"><uses-sdk android:minSdkVersion="23" android:targetSdkVersion="23"/><application android:label="Video test"/><instrumentation android:name="pt.photoframe.TEST_RUNNER" android:targetPackage="pt.photoframe"/></manifest>''').replace('TEST_RUNNER',runner))
     run(sys.executable,source/'tools/build.py','--sdk',a.sdk.resolve(),'--jdk',a.jdk.resolve(),'--keystore',a.keystore.resolve(),'--alias',a.alias,'--out',work/'build')
     if not (a.privacy_only or a.remote_only):
-        for name,size in (('small','640x360'),('large','1920x1080')):
-            run('ffmpeg','-hide_banner','-loglevel','error','-f','lavfi','-i','testsrc2=size='+size+':rate=24','-f','lavfi','-i','sine=frequency=440:sample_rate=44100','-t','4','-c:v','libx264','-preset','ultrafast','-pix_fmt','yuv420p','-c:a','aac','-y',work/(name+'.mp4'))
+        for name,size in (('small','640x360'),('large','1920x1080'),('long','640x360'),('longbaseline','640x360')):
+            run('ffmpeg','-hide_banner','-loglevel','error','-f','lavfi','-i','testsrc2=size='+size+':rate=24','-f','lavfi','-i','sine=frequency=440:sample_rate=44100','-map','1:a:0','-map','0:v:0','-t','12' if name.startswith('long') else '4','-c:v','libx264','-preset','medium' if name=='long' else 'ultrafast','-bf','2' if name=='long' else '0','-pix_fmt','yuv420p','-c:a','aac','-y',work/(name+'.mp4'))
         run('ffmpeg','-hide_banner','-loglevel','error','-display_rotation','90','-i',work/'large.mp4','-c','copy','-y',work/'rotated.mp4')
     run('adb','install','-r',a.apk.resolve())
     run('adb','install','-r',work/'build/Photoframe-vtest.apk')
     try:
         if not (a.privacy_only or a.remote_only):
-            for name in ('small','large','rotated'):
+            for name in ('small','large','rotated','long','longbaseline'):
                 run('adb','push',work/(name+'.mp4'),'/data/local/tmp/'+name+'.mp4')
         result=subprocess.check_output(['adb','shell','am','instrument','-w','pt.photoframe.videotest/pt.photoframe.'+runner],text=True,timeout=90)
         print(result)
         if 'INSTRUMENTATION_RESULT: result=PASS' not in result:raise SystemExit('Device tests failed')
     finally:
         run('adb','uninstall','pt.photoframe.videotest')
-        run('adb','shell','rm','-f','/data/local/tmp/small.mp4','/data/local/tmp/large.mp4','/data/local/tmp/rotated.mp4')
+        run('adb','shell','rm','-f','/data/local/tmp/small.mp4','/data/local/tmp/large.mp4','/data/local/tmp/rotated.mp4','/data/local/tmp/long.mp4','/data/local/tmp/longbaseline.mp4')
         run('adb','shell','am','start','-n','pt.photoframe/.MainActivity')

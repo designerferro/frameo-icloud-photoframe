@@ -41,27 +41,48 @@ final class VideoSupport {
             float scale=Math.min(1f,Math.min(display.x/(float)renderedWidth,display.y/(float)renderedHeight));
             boolean compatible="video/avc".equals(vf.getString(MediaFormat.KEY_MIME))&&scale>=1f;
             if(af!=null&&!"audio/mp4a-latm".equals(af.getString(MediaFormat.KEY_MIME)))throw new IOException("Unsupported audio codec");
+            if(compatible&&android.os.Build.VERSION.SDK_INT<25&&reorderedSamples(extractor,video,seconds))compatible=false;
             if(compatible){remux(extractor,destination,video,audio,vf,af,rotation,seconds);return;}
             transcode(source,destination,extractor,audio,af,even((int)(renderedWidth*scale)),even((int)(renderedHeight*scale)),seconds);
         }finally{extractor.release();}
     }
-    static void copyTrack(MediaExtractor ex,MediaMuxer mux,int source,int target,long limit)throws IOException{
-        ex.selectTrack(source);ex.seekTo(0,MediaExtractor.SEEK_TO_CLOSEST_SYNC);
-        ByteBuffer data=ByteBuffer.allocate(8*1024*1024);MediaCodec.BufferInfo info=new MediaCodec.BufferInfo();
+    static boolean reorderedSamples(MediaExtractor ex,int track,int seconds){
+        ex.selectTrack(track);ex.seekTo(0,MediaExtractor.SEEK_TO_CLOSEST_SYNC);
+        try{
+            long last=-1;int count=0;
+            while(ex.getSampleTrackIndex()>=0&&ex.getSampleTime()<seconds*1000000L){
+                long time=ex.getSampleTime();if(time<0){if(!ex.advance())break;continue;}if(time<last||++count>10000)return true;
+                last=time;if(!ex.advance())break;
+            }
+            return false;
+        }finally{ex.unselectTrack(track);}
+    }
+    static void copyAudioUntil(MediaExtractor ex,MediaMuxer mux,int target,long limit,ByteBuffer data)throws IOException{
+        MediaCodec.BufferInfo info=new MediaCodec.BufferInfo();
         while(ex.getSampleTrackIndex()>=0){
-            long time=ex.getSampleTime();if(time<0||time>=limit)break;
+            long time=ex.getSampleTime();if(time<0){if(!ex.advance())break;continue;}if(time>=limit)break;
             data.clear();int size=ex.readSampleData(data,0);if(size<0)break;
             info.set(0,size,time,ex.getSampleFlags());mux.writeSampleData(target,data,info);ex.advance();
         }
-        ex.unselectTrack(source);
     }
     static void remux(MediaExtractor ex,File destination,int video,int audio,MediaFormat vf,MediaFormat af,int rotation,int seconds)throws Exception{
         MediaMuxer mux=new MediaMuxer(destination.getAbsolutePath(),MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
         boolean started=false;
         try{
             mux.setOrientationHint(rotation);int v=mux.addTrack(vf),a=audio<0?-1:mux.addTrack(af);
-            mux.start();started=true;copyTrack(ex,mux,video,v,seconds*1000000L);
-            if(audio>=0)copyTrack(ex,mux,audio,a,seconds*1000000L);
+            ex.selectTrack(video);if(audio>=0)ex.selectTrack(audio);ex.seekTo(0,MediaExtractor.SEEK_TO_CLOSEST_SYNC);
+            mux.start();started=true;
+            ByteBuffer data=ByteBuffer.allocate(8*1024*1024);MediaCodec.BufferInfo info=new MediaCodec.BufferInfo();
+            // Feed both tracks together. On Android 6 the native MP4 writer can
+            // block indefinitely if a whole video track arrives before its audio.
+            while(ex.getSampleTrackIndex()>=0){
+                if(Thread.currentThread().isInterrupted())throw new IOException("Preparation interrupted");
+                int track=ex.getSampleTrackIndex();long time=ex.getSampleTime();
+                if(time<0){if(!ex.advance())break;continue;}
+                if(time>=seconds*1000000L){ex.unselectTrack(track);continue;}
+                data.clear();int size=ex.readSampleData(data,0);if(size<0)break;
+                info.set(0,size,time,ex.getSampleFlags());mux.writeSampleData(track==video?v:a,data,info);ex.advance();
+            }
         }finally{try{if(started)mux.stop();}finally{mux.release();}}
     }
     static void transcode(File source,File destination,MediaExtractor ex,int audio,MediaFormat af,int width,int height,int seconds)throws Exception{
@@ -87,6 +108,7 @@ final class VideoSupport {
             long duration=Math.min(seconds*1000L,player.getDuration());
             mux=new MediaMuxer(destination.getAbsolutePath(),MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
             int audioOut=audio<0?-1:mux.addTrack(af),videoOut=-1;
+            ByteBuffer audioData=ByteBuffer.allocate(1024*1024);
             player.start();long start=android.os.SystemClock.elapsedRealtime(),first=-1,last=-1;boolean eos=false,finished=false;
             MediaCodec.BufferInfo info=new MediaCodec.BufferInfo();
             while(!finished){
@@ -95,19 +117,19 @@ final class VideoSupport {
                 if(!eos&&elapsed>=duration){player.pause();encoder.signalEndOfInputStream();eos=true;}
                 if(elapsed>duration+15000)throw new IOException("Conversion timed out");
                 int output=encoder.dequeueOutputBuffer(info,10000);
-                if(output==MediaCodec.INFO_OUTPUT_FORMAT_CHANGED){videoOut=mux.addTrack(encoder.getOutputFormat());mux.start();muxStarted=true;}
+                if(output==MediaCodec.INFO_OUTPUT_FORMAT_CHANGED){videoOut=mux.addTrack(encoder.getOutputFormat());mux.start();muxStarted=true;if(audio>=0){ex.selectTrack(audio);ex.seekTo(0,MediaExtractor.SEEK_TO_CLOSEST_SYNC);}}
                 else if(output>=0){
                     if((info.flags&MediaCodec.BUFFER_FLAG_CODEC_CONFIG)==0&&info.size>0){
                         if(!muxStarted)throw new IOException("Missing output format");
                         if(first<0)first=info.presentationTimeUs;
                         info.presentationTimeUs=Math.max(last+1,info.presentationTimeUs-first);last=info.presentationTimeUs;
-                        if(info.presentationTimeUs<seconds*1000000L){ByteBuffer data=encoder.getOutputBuffer(output);data.position(info.offset);data.limit(info.offset+info.size);mux.writeSampleData(videoOut,data,info);}
+                        if(info.presentationTimeUs<seconds*1000000L){ByteBuffer data=encoder.getOutputBuffer(output);data.position(info.offset);data.limit(info.offset+info.size);if(audio>=0)copyAudioUntil(ex,mux,audioOut,info.presentationTimeUs+1,audioData);mux.writeSampleData(videoOut,data,info);}
                     }
                     finished=(info.flags&MediaCodec.BUFFER_FLAG_END_OF_STREAM)!=0;encoder.releaseOutputBuffer(output,false);
                 }
             }
             if(last<0)throw new IOException("No encoded video frames");
-            if(audio>=0)copyTrack(ex,mux,audio,audioOut,Math.min(seconds*1000000L,last+33333));
+            if(audio>=0)copyAudioUntil(ex,mux,audioOut,Math.min(seconds*1000000L,last+33333),audioData);
         }finally{
             if(player!=null)player.release();
             if(encoder!=null){try{if(codecStarted)encoder.stop();}finally{encoder.release();}}
