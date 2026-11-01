@@ -1,0 +1,84 @@
+name: Relatar um problema
+description: Algo não funciona como esperado na aplicação ou na instalação.
+title: "[Problema] "
+labels: [bug, needs-triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por ajudares a melhorar o Photoframe. Pesquisa primeiro nas issues existentes e consulta o README.
+        Esta issue será pública: não publiques ligações de álbuns iCloud, fotografias pessoais, palavras-passe, tokens, chaves ou dados da tua rede. Oculta-os também em imagens e registos.
+  - type: input
+    id: version
+    attributes:
+      label: Versão do Photoframe
+      description: Consulta a versão no menu da moldura ou na página remota. Se não sabes, indica isso.
+      placeholder: "Por exemplo: 1.4.0 (versionCode 10)"
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Moldura e versão Android
+      description: Marca/modelo e versão Android, se conhecidos. Nunca incluas o número de série.
+      placeholder: "Por exemplo: Apveelveer AVE-107, Android 6"
+    validations:
+      required: true
+  - type: dropdown
+    id: root
+    attributes:
+      label: A moldura tem root autorizado para Photoframe?
+      options:
+        - Não sei
+        - Sim
+        - Não
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Onde acontece o problema?
+      options:
+        - Instalação ou atualização do APK
+        - Álbum iCloud ou sincronização
+        - Fotografias, filmes ou som
+        - Horário do ecrã
+        - Acesso remoto no navegador
+        - Arranque ou orientação
+        - Outro
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Passos para reproduzir
+      description: Explica o que fizeste, por ordem, e se acontece sempre ou apenas às vezes.
+      placeholder: "1. Abri…\n2. Escolhi…\n3. Aconteceu…"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: O que esperavas que acontecesse?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: O que aconteceu e qual a mensagem de erro?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Informação adicional (opcional)
+      description: Podes incluir uma captura ou um excerto curto de registo, sem dados pessoais. No acesso remoto, indica o navegador; no horário, as horas configuradas e o fuso horário.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Antes de enviar
+      options:
+        - label: Pesquisei nas issues existentes para evitar duplicados.
+          required: true
+        - label: Retirei os dados pessoais, ligações de álbuns e credenciais do texto e dos anexos.
+          required: true

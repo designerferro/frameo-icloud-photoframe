@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ler o guia de instalação e utilização
+    url: https://github.com/designerferro/frameo-icloud-photoframe#readme
+    about: Consulta as instruções, funcionalidades e limitações antes de abrir uma issue.
+  - name: Descarregar a versão mais recente
+    url: https://github.com/designerferro/frameo-icloud-photoframe/releases/latest
+    about: Confirma se o problema continua a acontecer com a versão mais recente.
